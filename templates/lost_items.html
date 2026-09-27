@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lost Items</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+
+    <!-- ================= NAVBAR ================= -->
+
+    <nav class="navbar">
+
+        <div class="navbar-brand">
+            🔎 Smart Lost & Found
+        </div>
+
+        <div class="navbar-links">
+
+            <a href="/">Home</a>
+
+            <a href="/lost-items">Lost Items</a>
+
+            <a href="/found-items">Found Items</a>
+
+            {% if session.get("user_id") %}
+
+                <a href="/logout">Logout</a>
+
+            {% else %}
+
+                <a href="/login">Login</a>
+
+                <a href="/register">Register</a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="container">
+
+        <h1>Lost Items</h1>
+
+        <p>
+            Search for items that have been reported lost.
+        </p>
+
+
+        <!-- ================= SEARCH ================= -->
+
+        <form method="GET" action="/lost-items" class="search-box">
+
+            <input
+                type="text"
+                name="search"
+                placeholder="Search by item, category, color, brand or location..."
+                value="{{ search }}"
+            >
+
+            <button type="submit">
+                🔍 Search
+            </button>
+
+        </form>
+
+
+        <!-- ================= ITEMS ================= -->
+
+        {% if items %}
+
+            <div class="item-grid">
+
+                {% for item in items %}
+
+                    <div class="item-card">
+
+
+                        <!-- IMAGE -->
+
+                        {% if item.image_path %}
+
+                            <img
+                                src="{{ url_for('uploaded_file', filename=item.image_path) }}"
+                                alt="{{ item.item_name }}"
+                            >
+
+                        {% else %}
+
+                            <div class="no-image">
+                                📷 No Image
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- CONTENT -->
+
+                        <div class="item-content">
+
+                            <h2>
+                                {{ item.item_name }}
+                            </h2>
+
+
+                            <p>
+                                <strong>Category:</strong>
+                                {{ item.category or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Description:</strong>
+                                {{ item.description or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Color:</strong>
+                                {{ item.color or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Brand:</strong>
+                                {{ item.brand or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Lost Date:</strong>
+                                {{ item.lost_date or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Location:</strong>
+                                {{ item.location or "Not specified" }}
+                            </p>
+
+
+                            <p>
+                                <strong>Reported by:</strong>
+                                {{ item.name }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+        {% else %}
+
+            <div class="empty-message">
+
+                <h2>No Lost Items Found</h2>
+
+                <p>
+                    No items matched your search.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+
+        <!-- ================= ACTIONS ================= -->
+
+        <div class="actions">
+
+            {% if session.get("user_id") %}
+
+                <a href="/lost-item" class="btn">
+                    Report New Lost Item
+                </a>
+
+            {% endif %}
+
+            <a href="/found-items" class="btn btn-secondary">
+                View Found Items
+            </a>
+
+            <a href="/" class="btn btn-secondary">
+                Back to Home
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+
+        <p>
+            Smart Lost & Found System
+        </p>
+
+        <p>
+            Helping people reconnect with their belongings.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>

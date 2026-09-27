@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Lost Item</title>
+</head>
+
+<body>
+
+    <h1>Report Lost Item</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <label>Item Name:</label>
+        <input type="text" name="item_name" required>
+
+        <br><br>
+
+        <label>Category:</label>
+        <input type="text" name="category">
+
+        <br><br>
+
+        <label>Description:</label>
+        <textarea name="description"></textarea>
+
+        <br><br>
+
+        <label>Color:</label>
+        <input type="text" name="color">
+
+        <br><br>
+
+        <label>Brand:</label>
+        <input type="text" name="brand">
+
+        <br><br>
+
+        <label>Lost Date:</label>
+        <input type="date" name="lost_date">
+
+        <br><br>
+
+        <label>Location:</label>
+        <input type="text" name="location">
+
+        <br><br>
+
+        <label>Latitude:</label>
+        <input type="number" step="any" name="latitude">
+
+        <br><br>
+
+        <label>Longitude:</label>
+        <input type="number" step="any" name="longitude">
+
+        <br><br>
+
+        <label>Item Image:</label>
+        <input type="file" name="image" accept="image/*">
+
+        <br><br>
+
+        <button type="submit">Report Lost Item</button>
+
+    </form>
+
+    <br>
+
+    <a href="/">Back to Home</a>
+
+</body>
+
+</html>

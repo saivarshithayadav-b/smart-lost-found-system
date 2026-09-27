@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Found Items</title>
+</head>
+
+<body>
+
+    <h1>Found Items</h1>
+
+    {% if items %}
+
+        {% for item in items %}
+
+            <div>
+
+                <h2>{{ item.item_name }}</h2>
+
+                {% if item.image_path %}
+                    <img
+                        src="{{ url_for('uploaded_file', filename=item.image_path) }}"
+                        width="200"
+                        alt="{{ item.item_name }}"
+                    >
+                {% endif %}
+
+                <p>
+                    <strong>Category:</strong>
+                    {{ item.category }}
+                </p>
+
+                <p>
+                    <strong>Description:</strong>
+                    {{ item.description }}
+                </p>
+
+                <p>
+                    <strong>Color:</strong>
+                    {{ item.color }}
+                </p>
+
+                <p>
+                    <strong>Brand:</strong>
+                    {{ item.brand }}
+                </p>
+
+                <p>
+                    <strong>Found Date:</strong>
+                    {{ item.found_date }}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    {{ item.location }}
+                </p>
+
+                <p>
+                    <strong>Reported by:</strong>
+                    {{ item.name }}
+                </p>
+
+            </div>
+
+            <hr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No found items reported yet.</p>
+
+    {% endif %}
+
+    <br>
+
+    <a href="/found-item">
+        <button>Report New Found Item</button>
+    </a>
+
+    <br><br>
+
+    <a href="/">
+        <button>Back to Home</button>
+    </a>
+
+</body>
+
+</html>
