@@ -2,77 +2,525 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Report Found Item</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
 </head>
+
 
 <body>
 
-    <h1>Report Found Item</h1>
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
 
-    <form method="POST" enctype="multipart/form-data">
+    <nav class="navbar">
 
-        <label>Item Name:</label>
-        <input type="text" name="item_name" required>
+        <div class="navbar-brand">
+            Smart Lost & Found 🔎
+        </div>
 
-        <br><br>
+        <div class="navbar-links">
 
-        <label>Category:</label>
-        <input type="text" name="category">
+            <a href="/">
+                Home
+            </a>
 
-        <br><br>
+            <a href="/lost-items">
+                Lost Items
+            </a>
 
-        <label>Description:</label>
-        <textarea name="description"></textarea>
+            <a href="/found-items">
+                Found Items
+            </a>
 
-        <br><br>
+            {% if session.get("user_id") %}
 
-        <label>Color:</label>
-        <input type="text" name="color">
+                <!-- ================= NOTIFICATIONS ================= -->
 
-        <br><br>
+                <a href="/notifications">
 
-        <label>Brand:</label>
-        <input type="text" name="brand">
+                    <span class="notification-icon">
 
-        <br><br>
+                        🔔
 
-        <label>Found Date:</label>
-        <input type="date" name="found_date">
+                        {% if unread_count|default(0) > 0 %}
 
-        <br><br>
+                            <span class="notification-badge">
+                                {{ unread_count }}
+                            </span>
 
-        <label>Location:</label>
-        <input type="text" name="location">
+                        {% endif %}
 
-        <br><br>
+                    </span>
 
-        <label>Latitude:</label>
-        <input type="number" step="any" name="latitude">
+                    Notifications
 
-        <br><br>
+                </a>
 
-        <label>Longitude:</label>
-        <input type="number" step="any" name="longitude">
 
-        <br><br>
+                <!-- ================= LOGOUT ================= -->
 
-        <label>Item Image:</label>
-        <input type="file" name="image" accept="image/*">
+                <a href="/logout">
+                    Logout
+                </a>
 
-        <br><br>
+            {% else %}
 
-        <button type="submit">Report Found Item</button>
+                <!-- ================= LOGIN ================= -->
 
-    </form>
+                <a href="/login">
+                    Login
+                </a>
 
-    <br>
 
-    <a href="/">
-        <button>Back to Home</button>
-    </a>
+                <!-- ================= REGISTER ================= -->
+
+                <a href="/register">
+                    Register
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+    <main class="container">
+
+        <div class="form-container">
+
+            <!-- ================= FORM HEADER ================= -->
+
+            <div class="form-header">
+
+                <h1>
+                    📦 Report Found Item
+                </h1>
+
+                <p>
+                    Provide details about the item you found.
+                    This information can help its owner
+                    recover it.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 FORM
+                 ================================================= -->
+
+            <form method="POST"
+                  enctype="multipart/form-data"
+                  onsubmit="return validateForm()">
+
+
+                <!-- ================= ITEM NAME ================= -->
+
+                <div class="form-group">
+
+                    <label for="item_name">
+                        Item Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="item_name"
+                        name="item_name"
+                        placeholder="Example: Black Wallet"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ================= CATEGORY ================= -->
+
+                <div class="form-group">
+
+                    <label for="category">
+                        Category
+                    </label>
+
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        placeholder="Example: Wallet, Phone, Bag"
+                    >
+
+                </div>
+
+
+                <!-- ================= DESCRIPTION ================= -->
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Describe the item in detail..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- ================= COLOR ================= -->
+
+                <div class="form-group">
+
+                    <label for="color">
+                        Color
+                    </label>
+
+                    <input
+                        type="text"
+                        id="color"
+                        name="color"
+                        placeholder="Example: Black"
+                    >
+
+                </div>
+
+
+                <!-- ================= BRAND ================= -->
+
+                <div class="form-group">
+
+                    <label for="brand">
+                        Brand
+                    </label>
+
+                    <input
+                        type="text"
+                        id="brand"
+                        name="brand"
+                        placeholder="Example: Samsung, Nike, HP"
+                    >
+
+                </div>
+
+
+                <!-- ================= FOUND DATE ================= -->
+
+                <div class="form-group">
+
+                    <label for="found_date">
+                        Found Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="found_date"
+                        name="found_date"
+                    >
+
+                </div>
+
+
+                <!-- ================= LOCATION ================= -->
+
+                <div class="form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="Example: College campus"
+                    >
+
+                </div>
+
+
+                <!-- =================================================
+                     GPS LOCATION
+                     ================================================= -->
+
+                <div class="location-section">
+
+                    <h3>
+                        📍 Location Coordinates
+                    </h3>
+
+                    <p>
+                        Use your current location to help
+                        the system find nearby lost items.
+                    </p>
+
+
+                    <input
+                        type="hidden"
+                        name="latitude"
+                        id="latitude"
+                    >
+
+
+                    <input
+                        type="hidden"
+                        name="longitude"
+                        id="longitude"
+                    >
+
+
+                    <button
+                        type="button"
+                        class="location-button"
+                        onclick="getLocation()"
+                    >
+                        📍 Use My Current Location
+                    </button>
+
+
+                    <p
+                        id="location-status"
+                        class="location-status"
+                    ></p>
+
+                </div>
+
+
+                <!-- ================= ITEM IMAGE ================= -->
+
+                <div class="form-group">
+
+                    <label for="image">
+                        Item Image
+                    </label>
+
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept="image/*"
+                    >
+
+                    <small>
+                        Upload a clear image of the item
+                        if available.
+                    </small>
+
+                </div>
+
+
+                <!-- ================= SUBMIT ================= -->
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    📦 Report Found Item
+                </button>
+
+
+                <!-- ================= BACK ================= -->
+
+                <a
+                    href="/"
+                    class="back-button"
+                >
+                    ← Back to Home
+                </a>
+
+
+            </form>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
+
+    <footer class="footer">
+
+        <p>
+            Smart Lost & Found System
+        </p>
+
+        <p>
+            Helping people reconnect with their belongings.
+        </p>
+
+    </footer>
+
+
+    <!-- =====================================================
+         LOCATION SCRIPT
+         ===================================================== -->
+
+    <script>
+
+        function getLocation() {
+
+            const status =
+                document.getElementById(
+                    "location-status"
+                );
+
+            const latitudeInput =
+                document.getElementById(
+                    "latitude"
+                );
+
+            const longitudeInput =
+                document.getElementById(
+                    "longitude"
+                );
+
+
+            // -------------------------------------------------
+            // CHECK BROWSER SUPPORT
+            // -------------------------------------------------
+
+            if (!navigator.geolocation) {
+
+                status.textContent =
+                    "Geolocation is not supported by this browser.";
+
+                return;
+
+            }
+
+
+            // -------------------------------------------------
+            // SHOW LOADING MESSAGE
+            // -------------------------------------------------
+
+            status.textContent =
+                "Getting your location...";
+
+
+            // -------------------------------------------------
+            // GET CURRENT LOCATION
+            // -------------------------------------------------
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(position) {
+
+                    const latitude =
+                        position.coords.latitude;
+
+                    const longitude =
+                        position.coords.longitude;
+
+
+                    latitudeInput.value =
+                        latitude;
+
+                    longitudeInput.value =
+                        longitude;
+
+
+                    status.textContent =
+                        "✓ Location captured successfully.";
+
+                },
+
+
+                function(error) {
+
+                    switch (error.code) {
+
+                        case error.PERMISSION_DENIED:
+
+                            status.textContent =
+                                "Location permission denied. " +
+                                "Please allow location access.";
+
+                            break;
+
+
+                        case error.POSITION_UNAVAILABLE:
+
+                            status.textContent =
+                                "Location information is unavailable.";
+
+                            break;
+
+
+                        case error.TIMEOUT:
+
+                            status.textContent =
+                                "Location request timed out. " +
+                                "Please try again.";
+
+                            break;
+
+
+                        default:
+
+                            status.textContent =
+                                "Unable to get your location.";
+
+                    }
+
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+
+            );
+
+        }
+
+
+        // =====================================================
+        // FORM VALIDATION
+        // =====================================================
+
+        function validateForm() {
+
+            const itemName =
+                document.getElementById(
+                    "item_name"
+                ).value.trim();
+
+
+            if (!itemName) {
+
+                alert(
+                    "Please enter the item name."
+                );
+
+                return false;
+
+            }
+
+
+            return true;
+
+        }
+
+    </script>
+
 
 </body>
 

@@ -68,6 +68,48 @@ body {
 }
 
 
+/* ---------------- NOTIFICATION ---------------- */
+
+.notification-icon {
+    position: relative;
+
+    display: inline-block;
+
+    font-size: 18px;
+
+    line-height: 1;
+}
+
+.notification-badge {
+    position: absolute;
+
+    top: -8px;
+    right: -10px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    background-color: #ef4444;
+
+    color: white;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+
+    font-weight: bold;
+
+    line-height: 1;
+}
+
+
 /* ---------------- MAIN CONTAINER ---------------- */
 
 .container {
@@ -169,7 +211,9 @@ button:hover,
 }
 
 
-/* ---------------- FORMS ---------------- */
+/* =====================================================
+   FORMS
+   ===================================================== */
 
 .form-container {
     background-color: white;
@@ -184,6 +228,26 @@ button:hover,
     border-radius: 12px;
 
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form-header {
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.form-header h1 {
+    margin-bottom: 10px;
+}
+
+.form-header p {
+    color: #666;
+
+    line-height: 1.6;
+
+    margin: 0 auto;
+
+    max-width: 550px;
 }
 
 .form-group {
@@ -225,7 +289,143 @@ select:focus {
 
     border-color: #2563eb;
 
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    box-shadow:
+        0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+
+/* ---------------- FILE INPUT ---------------- */
+
+input[type="file"] {
+    background-color: #f8fafc;
+
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    border: none;
+
+    background-color: #e2e8f0;
+
+    color: #1e293b;
+
+    padding: 8px 12px;
+
+    border-radius: 6px;
+
+    margin-right: 10px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background-color: #cbd5e1;
+}
+
+
+/* ---------------- FORM HELP TEXT ---------------- */
+
+.form-group small {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* ---------------- LOCATION SECTION ---------------- */
+
+.location-section {
+    background-color: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    padding: 20px;
+
+    margin-bottom: 20px;
+}
+
+.location-section h3 {
+    color: #1e3a8a;
+
+    margin-top: 0;
+
+    margin-bottom: 8px;
+}
+
+.location-section p {
+    color: #64748b;
+
+    margin-top: 5px;
+}
+
+
+/* ---------------- LOCATION BUTTON ---------------- */
+
+.location-button {
+    background-color: #0f766e;
+
+    margin-top: 8px;
+}
+
+.location-button:hover {
+    background-color: #115e59;
+}
+
+
+/* ---------------- LOCATION STATUS ---------------- */
+
+.location-status {
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+/* ---------------- SUBMIT BUTTON ---------------- */
+
+.submit-button {
+    width: 100%;
+
+    margin-top: 10px;
+
+    padding: 13px;
+
+    background-color: #2563eb;
+
+    font-size: 16px;
+}
+
+.submit-button:hover {
+    background-color: #1d4ed8;
+}
+
+
+/* ---------------- BACK BUTTON ---------------- */
+
+.back-button {
+    display: block;
+
+    text-align: center;
+
+    margin-top: 18px;
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+.back-button:hover {
+    text-decoration: underline;
 }
 
 
@@ -240,7 +440,8 @@ select:focus {
 
     margin-bottom: 30px;
 
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.06);
 
     display: flex;
 
@@ -275,13 +476,60 @@ select:focus {
 
     overflow: hidden;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    box-shadow:
+        0 4px 15px rgba(0, 0, 0, 0.08);
 
     transition: transform 0.2s ease;
 }
 
 .item-card:hover {
     transform: translateY(-4px);
+}
+
+
+/* =====================================================
+   CLICKABLE FEATURE CARDS
+   ===================================================== */
+
+.feature-card {
+    display: block;
+
+    text-decoration: none;
+
+    color: inherit;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+    text-decoration: none;
+
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feature-card h2 {
+    color: #1e3a8a;
+}
+
+.feature-link {
+    display: inline-block;
+
+    margin-top: 12px;
+
+    color: #2563eb;
+
+    font-weight: bold;
+}
+
+.feature-card:hover .feature-link {
+    text-decoration: underline;
 }
 
 
@@ -364,7 +612,9 @@ select:focus {
 }
 
 
-/* ---------------- MOBILE ---------------- */
+/* =====================================================
+   MOBILE RESPONSIVE
+   ===================================================== */
 
 @media (max-width: 700px) {
 
@@ -406,6 +656,20 @@ select:focus {
 
     .item-grid {
         grid-template-columns: 1fr;
+    }
+
+    .form-container {
+        padding: 22px;
+
+        margin: 25px auto;
+    }
+
+    .form-header h1 {
+        font-size: 28px;
+    }
+
+    .location-section {
+        padding: 16px;
     }
 
 }

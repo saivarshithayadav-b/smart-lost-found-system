@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - Lost & Found</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 40px auto;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #777;
+            font-size: 15px;
+        }
+
+        .support-box {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .support-item {
+            padding: 22px 25px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .support-item:last-child {
+            border-bottom: none;
+        }
+
+        .support-item h3 {
+            font-size: 16px;
+            margin-bottom: 7px;
+        }
+
+        .support-item p {
+            color: #777;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .contact-btn {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 10px 18px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+        .faq {
+            margin-top: 15px;
+        }
+
+        .faq details {
+            border: 1px solid #eeeeee;
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .faq summary {
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .faq p {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 94%;
+                margin: 25px auto;
+            }
+
+            .header h1 {
+                font-size: 25px;
+            }
+
+            .support-item {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>Help & Support</h1>
+            <p>Find answers and get assistance with the Lost & Found system</p>
+        </div>
+
+        <div class="support-box">
+
+            <div class="support-item">
+                <h3>How do I report a lost item?</h3>
+                <p>
+                    Go to the lost item section, provide the required item
+                    details, and submit your report.
+                </p>
+            </div>
+
+            <div class="support-item">
+                <h3>How do I report a found item?</h3>
+                <p>
+                    Open the found item section and enter the details of the
+                    item you found before submitting the report.
+                </p>
+            </div>
+
+            <div class="support-item">
+                <h3>How does item matching work?</h3>
+                <p>
+                    The system compares information from lost and found item
+                    reports to identify possible matches.
+                </p>
+            </div>
+
+            <div class="support-item">
+                <h3>What should I do if I find my item?</h3>
+                <p>
+                    Check the relevant match information and follow the
+                    available recovery or contact process.
+                </p>
+            </div>
+
+            <div class="support-item">
+                <h3>Still need help?</h3>
+                <p>
+                    If you are facing a problem with the application, contact
+                    the system administrator or support team.
+                </p>
+
+                <a href="#" class="contact-btn">
+                    Contact Support
+                </a>
+            </div>
+
+            <div class="support-item">
+                <h3>Frequently Asked Questions</h3>
+
+                <div class="faq">
+
+                    <details>
+                        <summary>Can I update my lost item report?</summary>
+                        <p>
+                            You can update the information associated with
+                            your report when the editing feature is available.
+                        </p>
+                    </details>
+
+                    <details>
+                        <summary>Can I report multiple items?</summary>
+                        <p>
+                            Yes, each lost or found item can be reported
+                            separately.
+                        </p>
+                    </details>
+
+                    <details>
+                        <summary>Why am I not seeing a match?</summary>
+                        <p>
+                            A match may not appear if the available lost and
+                            found item information does not correspond closely
+                            enough.
+                        </p>
+                    </details>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

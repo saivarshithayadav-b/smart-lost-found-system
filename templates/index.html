@@ -5,42 +5,92 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Smart Lost & Found System</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
 <body>
 
 
-    <!-- ================= NAVBAR ================= -->
+    <!-- =====================================================
+         NAVBAR
+         ===================================================== -->
 
     <nav class="navbar">
 
         <div class="navbar-brand">
-            Smart Lost & Found  🔎 
+            Smart Lost & Found 🔎
         </div>
+
 
         <div class="navbar-links">
 
-            <a href="/">Home</a>
+            <!-- HOME -->
 
-            <a href="/lost-items">Lost Items</a>
+            <a href="/">
+                Home
+            </a>
 
-            <a href="/found-items">Found Items</a>
 
             {% if session.get("user_id") %}
 
-                <a href="/logout">Logout</a>
+                <!-- NOTIFICATIONS -->
+
+                <a href="/notifications">
+
+                    <span class="notification-icon">
+
+                        🔔
+
+                        {% if unread_count|default(0) > 0 %}
+
+                            <span class="notification-badge">
+                                {{ unread_count }}
+                            </span>
+
+                        {% endif %}
+
+                    </span>
+
+                    Notifications
+
+                </a>
+
+
+                <!-- PROFILE -->
+
+                <a href="/profile">
+                    👤 Profile
+                </a>
+
+
+                <!-- SETTINGS -->
+
+                <a href="/settings">
+                    ⚙️ Settings
+                </a>
+
 
             {% else %}
 
-                <a href="/login">Login</a>
+                <!-- LOGIN -->
 
-                <a href="/register">Register</a>
+                <a href="/login">
+                    Login
+                </a>
+
+
+                <!-- REGISTER -->
+
+                <a href="/register">
+                    Register
+                </a>
 
             {% endif %}
 
@@ -49,9 +99,17 @@
     </nav>
 
 
-    <!-- ================= HERO SECTION ================= -->
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
 
     <main class="container">
+
+
+        <!-- =================================================
+             HERO SECTION
+             ================================================= -->
 
         <section class="hero">
 
@@ -59,163 +117,135 @@
                 Smart Lost & Found System
             </h1>
 
+
             <p>
-                Find lost items faster using smart image and text matching.
+                Find lost items faster using smart image
+                and text matching.
             </p>
 
 
             {% if session.get("user_id") %}
 
                 <h3>
-                    Welcome, {{ session.get("name") }}! 👋
+                    Welcome,
+                    {{ session.get("name") }}! 👋
                 </h3>
-
-
-                <!-- ================= REPORT ITEMS ================= -->
-
-                <div class="actions">
-
-                    <a href="/lost-item" class="btn">
-                        Report Lost Item
-                    </a>
-
-                    <a href="/found-item" class="btn">
-                        Report Found Item
-                    </a>
-
-                </div>
-
-
-                <br>
-
-
-                <!-- ================= VIEW ITEMS ================= -->
-
-                <div class="actions">
-
-                    <a href="/lost-items" class="btn btn-secondary">
-                        View Lost Items
-                    </a>
-
-                    <a href="/found-items" class="btn btn-secondary">
-                        View Found Items
-                    </a>
-
-                </div>
-
-
-            {% else %}
-
-
-                <!-- ================= LOGIN / REGISTER ================= -->
-
-                <div class="actions">
-
-                    <a href="/login" class="btn">
-                        Login
-                    </a>
-
-                    <a href="/register" class="btn">
-                        Register
-                    </a>
-
-                </div>
-
-
-                <br>
-
-
-                <!-- ================= VIEW ITEMS WITHOUT LOGIN ================= -->
-
-                <div class="actions">
-
-                    <a href="/lost-items" class="btn btn-secondary">
-                        View Lost Items
-                    </a>
-
-                    <a href="/found-items" class="btn btn-secondary">
-                        View Found Items
-                    </a>
-
-                </div>
-
 
             {% endif %}
 
         </section>
 
 
-        <!-- ================= FEATURES ================= -->
+
+        <!-- =================================================
+             REPORT OPTIONS
+             ================================================= -->
 
         <section class="item-grid">
 
 
-            <!-- REPORT LOST -->
+            <!-- ================= REPORT LOST ================= -->
 
-            <div class="item-card">
-
-                <div class="item-content">
-
-                    <h2>📢 Report Lost</h2>
-
-                    <p>
-                        Report an item you have lost with details,
-                        location and an image.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- REPORT FOUND -->
-
-            <div class="item-card">
+            <a
+                href="/lost-item"
+                class="item-card feature-card"
+            >
 
                 <div class="item-content">
 
-                    <h2>📦 Report Found</h2>
+                    <h2>
+                        📢 Report Lost
+                    </h2>
+
 
                     <p>
-                        Help someone recover their lost belongings
-                        by reporting items you have found.
+                        Report an item you have lost
+                        with details, location and
+                        an image.
                     </p>
+
+
+                    <span class="feature-link">
+                        Report Lost Item →
+                    </span>
 
                 </div>
 
-            </div>
+            </a>
 
 
-            <!-- SEARCH -->
 
-            <div class="item-card">
+            <!-- ================= REPORT FOUND ================= -->
+
+            <a
+                href="/found-item"
+                class="item-card feature-card"
+            >
 
                 <div class="item-content">
 
-                    <h2>🔍 Search Items</h2>
+                    <h2>
+                        📦 Report Found
+                    </h2>
+
 
                     <p>
-                        Search reported lost and found items using
-                        keywords such as name, color, brand or location.
+                        Help someone recover their
+                        lost belongings by reporting
+                        items you have found.
                     </p>
+
+
+                    <span class="feature-link">
+                        Report Found Item →
+                    </span>
 
                 </div>
 
-            </div>
-
+            </a>
 
         </section>
+
+
+
+        <!-- =================================================
+             VIEW BUTTONS
+             ================================================= -->
+
+        <section class="actions">
+
+            <a
+                href="/lost-items"
+                class="btn btn-secondary"
+            >
+                View My Lost Items
+            </a>
+
+
+            <a
+                href="/found-items"
+                class="btn btn-secondary"
+            >
+                View My Found Items
+            </a>
+
+        </section>
+
 
     </main>
 
 
-    <!-- ================= FOOTER ================= -->
+
+    <!-- =====================================================
+         FOOTER
+         ===================================================== -->
 
     <footer class="footer">
 
         <p>
             Smart Lost & Found System
         </p>
+
 
         <p>
             Helping people reconnect with their belongings.

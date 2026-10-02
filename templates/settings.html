@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Lost & Found</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 40px auto;
+        }
+
+        .back-arrow {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #222;
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .back-arrow:hover {
+            color: #667eea;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .settings-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            padding: 22px 25px;
+            text-decoration: none;
+            color: #222;
+            border-bottom: 1px solid #eee;
+            transition: 0.2s;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item:hover {
+            background: #f8f9ff;
+        }
+
+        .setting-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #eef0ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 18px;
+        }
+
+        .setting-content {
+            flex: 1;
+        }
+
+        .setting-content h3 {
+            font-size: 17px;
+            margin-bottom: 5px;
+        }
+
+        .setting-content p {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .arrow {
+            font-size: 28px;
+            color: #888;
+        }
+
+        /* Logout */
+
+        .logout-item {
+            color: #d9534f;
+        }
+
+        .logout-item .setting-icon {
+            background: #fff0f0;
+        }
+
+        .logout-item .arrow {
+            color: #d9534f;
+        }
+
+        .logout-item:hover {
+            background: #fff5f5;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                width: 92%;
+                margin: 25px auto;
+            }
+
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .setting-item {
+                padding: 18px;
+            }
+
+            .setting-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 21px;
+                margin-right: 14px;
+            }
+
+            .setting-content h3 {
+                font-size: 16px;
+            }
+
+            .setting-content p {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <a href="{{ url_for('home') }}" class="back-arrow">←</a>
+
+        <div class="header">
+            <h1>Settings</h1>
+            <p>Manage your account and preferences</p>
+        </div>
+
+        <div class="settings-box">
+
+            <a href="{{ url_for('profile_settings') }}" class="setting-item">
+                <div class="setting-icon">👤</div>
+
+                <div class="setting-content">
+                    <h3>Profile Settings</h3>
+                    <p>Manage your personal information</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{{ url_for('account_settings') }}" class="setting-item">
+                <div class="setting-icon">🔐</div>
+
+                <div class="setting-content">
+                    <h3>Account &amp; Security</h3>
+                    <p>Manage your account security</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{{ url_for('privacy') }}" class="setting-item">
+                <div class="setting-icon">🛡️</div>
+
+                <div class="setting-content">
+                    <h3>Privacy</h3>
+                    <p>Manage your privacy preferences</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{{ url_for('help_support') }}" class="setting-item">
+                <div class="setting-icon">❓</div>
+
+                <div class="setting-content">
+                    <h3>Help &amp; Support</h3>
+                    <p>Get help with the Lost &amp; Found system</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+            <a href="{{ url_for('about') }}" class="setting-item">
+                <div class="setting-icon">ℹ️</div>
+
+                <div class="setting-content">
+                    <h3>About</h3>
+                    <p>View information about the application</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+            <!-- LOGOUT -->
+
+            <a href="{{ url_for('logout') }}" class="setting-item logout-item">
+                <div class="setting-icon">🚪</div>
+
+                <div class="setting-content">
+                    <h3>Logout</h3>
+                    <p>Sign out of your account</p>
+                </div>
+
+                <span class="arrow">›</span>
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

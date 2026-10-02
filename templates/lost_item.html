@@ -2,74 +2,630 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Report Lost Item</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
-    <h1>Report Lost Item</h1>
+    <!-- NAVBAR -->
 
-    <form method="POST" enctype="multipart/form-data">
+    <nav class="navbar">
 
-        <label>Item Name:</label>
-        <input type="text" name="item_name" required>
+        <div class="navbar-brand">
+            Smart Lost & Found 🔎
+        </div>
 
-        <br><br>
+        <div class="navbar-links">
 
-        <label>Category:</label>
-        <input type="text" name="category">
+            <a href="/">
+                Home
+            </a>
 
-        <br><br>
+            <a href="/lost-items">
+                Lost Items
+            </a>
 
-        <label>Description:</label>
-        <textarea name="description"></textarea>
+            <a href="/found-items">
+                Found Items
+            </a>
 
-        <br><br>
+            {% if session.get("user_id") %}
 
-        <label>Color:</label>
-        <input type="text" name="color">
+                <a href="/notifications">
 
-        <br><br>
+                    <span class="notification-icon">
 
-        <label>Brand:</label>
-        <input type="text" name="brand">
+                        🔔
 
-        <br><br>
+                        {% if unread_count|default(0) > 0 %}
 
-        <label>Lost Date:</label>
-        <input type="date" name="lost_date">
+                            <span class="notification-badge">
+                                {{ unread_count }}
+                            </span>
 
-        <br><br>
+                        {% endif %}
 
-        <label>Location:</label>
-        <input type="text" name="location">
+                    </span>
 
-        <br><br>
+                    Notifications
 
-        <label>Latitude:</label>
-        <input type="number" step="any" name="latitude">
+                </a>
 
-        <br><br>
+                <a href="/logout">
+                    Logout
+                </a>
 
-        <label>Longitude:</label>
-        <input type="number" step="any" name="longitude">
+            {% else %}
 
-        <br><br>
+                <a href="/login">
+                    Login
+                </a>
 
-        <label>Item Image:</label>
-        <input type="file" name="image" accept="image/*">
+                <a href="/register">
+                    Register
+                </a>
 
-        <br><br>
+            {% endif %}
 
-        <button type="submit">Report Lost Item</button>
+        </div>
 
-    </form>
+    </nav>
 
-    <br>
 
-    <a href="/">Back to Home</a>
+    <!-- MAIN CONTENT -->
+
+    <main class="container">
+
+        <div class="form-container">
+
+            <!-- FORM HEADER -->
+
+            <div class="form-header">
+
+                <h1>
+                    📢 Report Lost Item
+                </h1>
+
+                <p>
+                    Provide details about the item you lost.
+                    This information will help our system
+                    find potential matches.
+                </p>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <form method="POST"
+                  enctype="multipart/form-data">
+
+
+                <!-- ITEM NAME -->
+
+                <div class="form-group">
+
+                    <label for="item_name">
+                        Item Name *
+                    </label>
+
+                    <input
+                        type="text"
+                        id="item_name"
+                        name="item_name"
+                        placeholder="Example: Black Wallet"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+                    <label for="category">
+                        Category
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category"
+                        onchange="showVerificationQuestions()"
+                    >
+
+                        <option value="">
+                            Select Category
+                        </option>
+
+                        <option value="phone">
+                            Phone
+                        </option>
+
+                        <option value="laptop">
+                            Laptop
+                        </option>
+
+                        <option value="bag">
+                            Bag
+                        </option>
+
+                        <option value="wallet">
+                            Wallet
+                        </option>
+
+                        <option value="watch">
+                            Watch
+                        </option>
+
+                        <option value="jewelry">
+                            Jewelry
+                        </option>
+
+                        <option value="other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        placeholder="Describe the item in detail..."
+                    ></textarea>
+
+                </div>
+
+
+                <!-- COLOR -->
+
+                <div class="form-group">
+
+                    <label for="color">
+                        Color
+                    </label>
+
+                    <input
+                        type="text"
+                        id="color"
+                        name="color"
+                        placeholder="Example: Black"
+                    >
+
+                </div>
+
+
+                <!-- BRAND -->
+
+                <div class="form-group">
+
+                    <label for="brand">
+                        Brand
+                    </label>
+
+                    <input
+                        type="text"
+                        id="brand"
+                        name="brand"
+                        placeholder="Example: Samsung, Nike, HP"
+                    >
+
+                </div>
+
+
+                <!-- LOST DATE -->
+
+                <div class="form-group">
+
+                    <label for="lost_date">
+                        Lost Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="lost_date"
+                        name="lost_date"
+                    >
+
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="Example: College campus"
+                    >
+
+                </div>
+
+
+                <!-- GPS LOCATION -->
+
+                <div class="location-section">
+
+                    <h3>
+                        📍 Location Coordinates
+                    </h3>
+
+                    <p>
+                        Use your current location to help
+                        identify nearby found items.
+                    </p>
+
+                    <input
+                        type="hidden"
+                        name="latitude"
+                        id="latitude"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="longitude"
+                        id="longitude"
+                    >
+
+                    <button
+                        type="button"
+                        class="location-button"
+                        onclick="getLocation()"
+                    >
+                        📍 Use My Current Location
+                    </button>
+
+                    <p
+                        id="location-status"
+                        class="location-status"
+                    ></p>
+
+                </div>
+
+
+                <!-- OWNERSHIP VERIFICATION -->
+
+                <div
+                    id="verification-section"
+                    class="verification-section"
+                    style="display: none;"
+                >
+
+                    <h3>
+                        🔐 Ownership Verification Details
+                    </h3>
+
+                    <p>
+                        These details are private and may be used
+                        to verify ownership if a potential match
+                        is found.
+                    </p>
+
+                    <div id="verification-questions"></div>
+
+                </div>
+
+
+                <!-- ITEM IMAGE -->
+
+                <div class="form-group">
+
+                    <label for="image">
+                        Item Image
+                    </label>
+
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept="image/*"
+                    >
+
+                    <small>
+                        Upload a clear image of the item
+                        if available.
+                    </small>
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    class="submit-button"
+                >
+                    📢 Report Lost Item
+                </button>
+
+
+                <!-- BACK -->
+
+                <a
+                    href="/"
+                    class="back-button"
+                >
+                    ← Back to Home
+                </a>
+
+
+            </form>
+
+        </div>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+        <p>
+            Smart Lost & Found System
+        </p>
+
+        <p>
+            Helping people reconnect with their belongings.
+        </p>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+        function getLocation() {
+
+            const status =
+                document.getElementById(
+                    "location-status"
+                );
+
+            if (!navigator.geolocation) {
+
+                status.textContent =
+                    "Geolocation is not supported by this browser.";
+
+                return;
+
+            }
+
+            status.textContent =
+                "Getting your location...";
+
+            navigator.geolocation.getCurrentPosition(
+
+                function(position) {
+
+                    const latitude =
+                        position.coords.latitude;
+
+                    const longitude =
+                        position.coords.longitude;
+
+                    document.getElementById(
+                        "latitude"
+                    ).value = latitude;
+
+                    document.getElementById(
+                        "longitude"
+                    ).value = longitude;
+
+                    status.textContent =
+                        "✓ Location captured successfully.";
+
+                },
+
+                function(error) {
+
+                    status.textContent =
+                        "Unable to get your location. " +
+                        "Please allow location access.";
+
+                }
+
+            );
+
+        }
+
+
+        function showVerificationQuestions() {
+
+            const category =
+                document.getElementById(
+                    "category"
+                ).value;
+
+            const section =
+                document.getElementById(
+                    "verification-section"
+                );
+
+            const questions =
+                document.getElementById(
+                    "verification-questions"
+                );
+
+            questions.innerHTML = "";
+
+            if (!category) {
+
+                section.style.display = "none";
+
+                return;
+
+            }
+
+
+            const categoryQuestions = {
+
+                phone: [
+
+                    "Any scratches, cracks, or damage?",
+
+                    "What type or color of phone case did it have?",
+
+                    "Any sticker, mark, or engraving?",
+
+                    "Any other unique feature?"
+
+                ],
+
+
+                laptop: [
+
+                    "Any scratches, dents, or damage?",
+
+                    "Any sticker or label on the laptop?",
+
+                    "Any engraving or identifying mark?",
+
+                    "Any other unique feature?"
+
+                ],
+
+
+                bag: [
+
+                    "Any scratches, tears, or damage?",
+
+                    "Was there any keychain attached?",
+
+                    "Any sticker, patch, or label?",
+
+                    "Any other unique feature?"
+
+                ],
+
+
+                wallet: [
+
+                    "Any scratches, marks, or damage?",
+
+                    "Any initials or engraving?",
+
+                    "Any sticker or unique design?",
+
+                    "What was a distinctive item inside it?"
+
+                ],
+
+
+                watch: [
+
+                    "Any scratches or damage?",
+
+                    "What type or color was the strap?",
+
+                    "Any engraving or identifying mark?",
+
+                    "Any other unique feature?"
+
+                ],
+
+
+                jewelry: [
+
+                    "Any scratches or damage?",
+
+                    "Any engraving?",
+
+                    "What was distinctive about the design or stone?",
+
+                    "Any other unique feature?"
+
+                ],
+
+
+                other: [
+
+                    "Any scratches or damage?",
+
+                    "Any unique identifying mark?",
+
+                    "Any sticker, engraving, or label?",
+
+                    "Any other unique feature?"
+
+                ]
+
+            };
+
+
+            const selectedQuestions =
+                categoryQuestions[category];
+
+
+            selectedQuestions.forEach(
+
+                function(question, index) {
+
+                    const div =
+                        document.createElement(
+                            "div"
+                        );
+
+                    div.className =
+                        "form-group";
+
+
+                    div.innerHTML = `
+
+                        <label
+                            for="verification_${index}"
+                        >
+                            ${question}
+                        </label>
+
+                        <textarea
+                            id="verification_${index}"
+                            name="verification_${index}"
+                            placeholder="Enter details..."
+                        ></textarea>
+
+                    `;
+
+
+                    questions.appendChild(div);
+
+                }
+
+            );
+
+
+            section.style.display = "block";
+
+        }
+
+    </script>
 
 </body>
 

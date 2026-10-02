@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Notifications | Smart Lost & Found</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        /* NAVBAR */
+
+        nav {
+            background: #ffffff;
+            padding: 18px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+        }
+
+        /* MAIN */
+
+        .container {
+            width: 90%;
+            max-width: 900px;
+            margin: 50px auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1e293b;
+        }
+
+        .unread {
+            background: #2563eb;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* NOTIFICATION CARD */
+
+        .notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #2563eb;
+        }
+
+        .notification-card.read {
+            border-left: 5px solid #94a3b8;
+        }
+
+        .notification-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #475569;
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+
+        .details {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .details p {
+            margin: 7px 0;
+            color: #475569;
+        }
+
+        .details strong {
+            color: #1e293b;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .unread-status {
+            color: #2563eb;
+        }
+
+        .read-status {
+            color: #64748b;
+        }
+
+        /* BUTTON */
+
+        .read-button {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 7px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .read-button:hover {
+            background: #1d4ed8;
+        }
+
+        /* EMPTY STATE */
+
+        .empty {
+            background: white;
+            padding: 60px 20px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .empty h2 {
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .empty p {
+            color: #64748b;
+        }
+
+        /* BACK BUTTON */
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            text-decoration: none;
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .container {
+                width: 92%;
+                margin-top: 30px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- NAVBAR -->
+
+    <nav>
+
+        <div class="logo">
+            🔎 Smart Lost & Found
+        </div>
+
+        <div class="nav-links">
+
+            <a href="/">
+                Home
+            </a>
+
+            <a href="{{ url_for('notifications') }}">
+                🔔 Notifications
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- MAIN CONTENT -->
+
+    <div class="container">
+
+
+        <div class="header">
+
+            <h1>
+                🔔 Notifications
+            </h1>
+
+            <div class="unread">
+
+                Unread:
+                {{ unread_count }}
+
+            </div>
+
+        </div>
+
+
+        {% if notifications %}
+
+
+            {% for notification in notifications %}
+
+
+                <div class="notification-card
+                    {% if notification['is_read'] %}
+                        read
+                    {% endif %}
+                ">
+
+
+                    <div class="notification-title">
+
+                        🔔 Match Notification
+
+                    </div>
+
+
+                    <div class="message">
+
+                        {{ notification["message"] }}
+
+                    </div>
+
+
+                    <div class="details">
+
+                        <p>
+                            <strong>
+                                Lost Item ID:
+                            </strong>
+
+                            {{ notification["related_lost_item_id"] }}
+
+                        </p>
+
+
+                        <p>
+                            <strong>
+                                Found Item ID:
+                            </strong>
+
+                            {{ notification["related_found_item_id"] }}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Status:
+                            </strong>
+
+                            {% if notification["is_read"] %}
+
+                                <span class="status read-status">
+                                    ✓ Read
+                                </span>
+
+                            {% else %}
+
+                                <span class="status unread-status">
+                                    ● Unread
+                                </span>
+
+                            {% endif %}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Created:
+                            </strong>
+
+                            {{ notification["created_at"] }}
+
+                        </p>
+
+                    </div>
+
+
+                    {% if not notification["is_read"] %}
+
+                        <a
+                            class="read-button"
+                            href="{{ url_for(
+                                'mark_notification_read',
+                                notification_id=notification['id']
+                            ) }}"
+                        >
+
+                            ✓ Mark as Read
+
+                        </a>
+
+                    {% endif %}
+
+
+                </div>
+
+
+            {% endfor %}
+
+
+        {% else %}
+
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    🔔
+                </div>
+
+                <h2>
+                    No Notifications
+                </h2>
+
+                <p>
+                    You don't have any notifications yet.
+                </p>
+
+            </div>
+
+
+        {% endif %}
+
+
+        <a class="back" href="/">
+            ← Back to Home
+        </a>
+
+
+    </div>
+
+
+</body>
+
+</html>

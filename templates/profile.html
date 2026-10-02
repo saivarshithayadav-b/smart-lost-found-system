@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Lost & Found</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 40px auto;
+        }
+
+        .back-arrow {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #222;
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .back-arrow:hover {
+            color: #667eea;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .profile-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .profile-header {
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #eef0ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin-right: 18px;
+        }
+
+        .profile-header h2 {
+            font-size: 21px;
+            margin-bottom: 5px;
+        }
+
+        .profile-header p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .profile-info {
+            padding: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 14px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            width: 120px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #333;
+        }
+
+        .section-title {
+            font-size: 21px;
+            padding: 22px 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item {
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item h3 {
+            font-size: 17px;
+            margin-bottom: 10px;
+        }
+
+        .item p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .empty {
+            padding: 25px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 12px 20px;
+            background: #fff0f0;
+            color: #d9534f;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .logout-button:hover {
+            background: #ffe5e5;
+        }
+
+        @media (max-width: 600px) {
+
+            .container {
+                width: 92%;
+                margin: 25px auto;
+            }
+
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .profile-header {
+                padding: 20px;
+            }
+
+            .profile-info {
+                padding: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .info-label {
+                width: auto;
+            }
+
+            .section-title {
+                padding: 20px;
+            }
+
+            .item {
+                padding: 18px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="{{ url_for('home') }}" class="back-arrow">←</a>
+
+    <div class="header">
+        <h1>Profile</h1>
+        <p>View your account information and reported items</p>
+    </div>
+
+
+    <!-- PROFILE INFORMATION -->
+
+    <div class="profile-box">
+
+        <div class="profile-header">
+
+            <div class="profile-icon">
+                👤
+            </div>
+
+            <div>
+                <h2>{{ user.name }}</h2>
+                <p>{{ user.email }}</p>
+            </div>
+
+        </div>
+
+
+        <div class="profile-info">
+
+            <div class="info-row">
+
+                <div class="info-label">
+                    Name
+                </div>
+
+                <div class="info-value">
+                    {{ user.name }}
+                </div>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <div class="info-label">
+                    Email
+                </div>
+
+                <div class="info-value">
+                    {{ user.email }}
+                </div>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <div class="info-label">
+                    Joined
+                </div>
+
+                <div class="info-value">
+                    {{ user.created_at }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- LOST ITEMS -->
+
+    <div class="profile-box">
+
+        <div class="section-title">
+            My Lost Items
+        </div>
+
+        {% if lost_items %}
+
+            {% for item in lost_items %}
+
+                <div class="item">
+
+                    <h3>
+                        {{ item.item_name }}
+                    </h3>
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ item.category }}
+                    </p>
+
+                    <p>
+                        <strong>Description:</strong>
+                        {{ item.description }}
+                    </p>
+
+                    <p>
+                        <strong>Color:</strong>
+                        {{ item.color }}
+                    </p>
+
+                    <p>
+                        <strong>Brand:</strong>
+                        {{ item.brand }}
+                    </p>
+
+                    <p>
+                        <strong>Lost Date:</strong>
+                        {{ item.lost_date }}
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ item.location }}
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                You have not reported any lost items yet.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- FOUND ITEMS -->
+
+    <div class="profile-box">
+
+        <div class="section-title">
+            My Found Items
+        </div>
+
+        {% if found_items %}
+
+            {% for item in found_items %}
+
+                <div class="item">
+
+                    <h3>
+                        {{ item.item_name }}
+                    </h3>
+
+                    <p>
+                        <strong>Category:</strong>
+                        {{ item.category }}
+                    </p>
+
+                    <p>
+                        <strong>Description:</strong>
+                        {{ item.description }}
+                    </p>
+
+                    <p>
+                        <strong>Color:</strong>
+                        {{ item.color }}
+                    </p>
+
+                    <p>
+                        <strong>Brand:</strong>
+                        {{ item.brand }}
+                    </p>
+
+                    <p>
+                        <strong>Found Date:</strong>
+                        {{ item.found_date }}
+                    </p>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ item.location }}
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                You have not reported any found items yet.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- LOGOUT -->
+
+    <a href="{{ url_for('logout') }}" class="logout-button">
+        Logout
+    </a>
+
+</div>
+
+</body>
+</html>

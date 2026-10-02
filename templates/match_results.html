@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Potential Matches</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        .match-card {
+            margin-bottom: 30px;
+        }
+
+        .images {
+            display: flex;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .image-box {
+            width: 45%;
+        }
+
+        .image-box img {
+            width: 100%;
+            max-width: 350px;
+            height: 250px;
+            object-fit: contain;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .no-image {
+            width: 100%;
+            max-width: 350px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f2f2f2;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Potential Matches</h1>
+
+    {% if matching_results %}
+
+        <p>
+            We found {{ matching_results|length }}
+            nearby potential match(es).
+        </p>
+
+    {% for result in matching_results %}
+        <p>Lost Image: {{ result["lost_item_image"] }}</p>
+        <p>Found Image: {{ result["found_item_image"] }}</p>
+
+            <div class="match-card">
+
+                <hr>
+
+                <h2>
+                    {{ result["found_item_name"] }}
+                </h2>
+
+
+                <!-- ================= IMAGES ================= -->
+
+                <div class="images">
+
+                    <!-- LOST ITEM IMAGE -->
+
+                    <div class="image-box">
+
+                        <h3>Your Lost Item</h3>
+
+                        {% if result["lost_item_image"] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'uploaded_file',
+                                    filename=result['lost_item_image']
+                                ) }}"
+                                alt="Your Lost Item"
+                            >
+
+                        {% else %}
+
+                            <div class="no-image">
+                                📷 No Image
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- FOUND ITEM IMAGE -->
+
+                    <div class="image-box">
+
+                        <h3>Found Item</h3>
+
+                        {% if result["found_item_image"] %}
+
+                            <img
+                                src="{{ url_for(
+                                    'uploaded_file',
+                                    filename=result['found_item_image']
+                                ) }}"
+                                alt="{{ result['found_item_name'] }}"
+                            >
+
+                        {% else %}
+
+                            <div class="no-image">
+                                📷 No Image
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= DISTANCE ================= -->
+
+                <p>
+                    <strong>Distance:</strong>
+                    {{ result["distance_km"] }} km
+                </p>
+
+
+                <!-- ================= SCORES ================= -->
+
+                <h3>Matching Scores</h3>
+
+                <p>
+                    Category: {{ result["category_score"] }}
+                </p>
+
+                <p>
+                    Color: {{ result["color_score"] }}
+                </p>
+
+                <p>
+                    Brand: {{ result["brand_score"] }}
+                </p>
+
+                <p>
+                    Date: {{ result["date_score"] }}
+                </p>
+
+                <p>
+                    Metadata: {{ result["metadata_score"] }}
+                </p>
+
+                <p>
+                    Text Similarity: {{ result["text_score"] }}
+                </p>
+
+                <p>
+                    Image Similarity: {{ result["image_score"] }}
+                </p>
+
+                <h3>
+                    Final Score: {{ result["final_score"] }}
+                </h3>
+
+                <p>
+                    Threshold: {{ result["threshold"] }}
+                </p>
+
+
+                <!-- ================= DECISION ================= -->
+
+                <h2>
+                    {{ result["decision"] }}
+                </h2>
+
+
+                <!-- ================= VERIFICATION ================= -->
+
+                {% if result["decision"] == "Potential Match" %}
+
+                    <h3>
+                        Please verify this match
+                    </h3>
+
+                    <p>
+                        Compare the two images above and
+                        decide whether the found item is yours.
+                    </p>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('verify_match') }}"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="found_item_id"
+                            value="{{ result['found_item_id'] }}"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="final_score"
+                            value="{{ result['final_score'] }}"
+                        >
+
+                        <button
+                            type="submit"
+                            name="verification"
+                            value="confirmed"
+                        >
+                            Yes, This Is My Item
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="verification"
+                            value="rejected"
+                        >
+                            No, This Is Not My Item
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>
+            No nearby potential matches were found.
+        </p>
+
+    {% endif %}
+
+    <br>
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</body>
+
+</html>
