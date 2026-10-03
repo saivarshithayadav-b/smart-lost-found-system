@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Match Details</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .back-arrow {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #222;
+            font-size: 28px;
+            font-weight: 500;
+        }
+
+        .back-arrow:hover {
+            color: #667eea;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+        }
+
+        .match-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .lost-title {
+            color: #d9534f;
+        }
+
+        .found-title {
+            color: #28a745;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            background: #f1f1f1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .no-image {
+            width: 100%;
+            height: 250px;
+            background: #f1f1f1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .detail {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .detail strong {
+            display: inline-block;
+            width: 100px;
+        }
+
+        .match-box {
+            margin-top: 30px;
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .match-box h2 {
+            margin-top: 0;
+        }
+
+        .score {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #fff3cd;
+            color: #856404;
+            font-weight: bold;
+        }
+
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            margin: 5px;
+        }
+
+        .confirm-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .reject-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .home-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .match-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- BACK -->
+        <a href="{{ url_for('notifications') }}" class="back-arrow">←</a>
+
+        <h1>Potential Match Found</h1>
+
+        <p class="subtitle">
+            We found a possible match for your lost item.
+            Please check the details below.
+        </p>
+
+        <div class="match-container">
+
+            <!-- YOUR LOST ITEM -->
+            <div class="card">
+
+                <h2 class="lost-title">
+                    Your Lost Item
+                </h2>
+
+                {% if match.lost_image %}
+
+                    <img
+                        src="{{ url_for('uploaded_file', filename=match.lost_image) }}"
+                        alt="Your Lost Item"
+                        class="item-image"
+                    >
+
+                {% else %}
+
+                    <div class="no-image">
+                        No image available
+                    </div>
+
+                {% endif %}
+
+                <div class="detail">
+                    <strong>Name:</strong>
+                    {{ match.lost_item_name }}
+                </div>
+
+                <div class="detail">
+                    <strong>Category:</strong>
+                    {{ match.lost_category }}
+                </div>
+
+                <div class="detail">
+                    <strong>Description:</strong>
+                    {{ match.lost_description }}
+                </div>
+
+                <div class="detail">
+                    <strong>Color:</strong>
+                    {{ match.lost_color }}
+                </div>
+
+                <div class="detail">
+                    <strong>Brand:</strong>
+                    {{ match.lost_brand }}
+                </div>
+
+                <div class="detail">
+                    <strong>Lost Date:</strong>
+                    {{ match.lost_date }}
+                </div>
+
+                <div class="detail">
+                    <strong>Location:</strong>
+                    {{ match.lost_location }}
+                </div>
+
+            </div>
+
+
+            <!-- FOUND ITEM -->
+            <div class="card">
+
+                <h2 class="found-title">
+                    Found Item
+                </h2>
+
+                {% if match.found_image %}
+
+                    <img
+                        src="{{ url_for('uploaded_file', filename=match.found_image) }}"
+                        alt="Found Item"
+                        class="item-image"
+                    >
+
+                {% else %}
+
+                    <div class="no-image">
+                        No image available
+                    </div>
+
+                {% endif %}
+
+                <div class="detail">
+                    <strong>Name:</strong>
+                    {{ match.found_item_name }}
+                </div>
+
+                <div class="detail">
+                    <strong>Category:</strong>
+                    {{ match.found_category }}
+                </div>
+
+                <div class="detail">
+                    <strong>Description:</strong>
+                    {{ match.found_description }}
+                </div>
+
+                <div class="detail">
+                    <strong>Color:</strong>
+                    {{ match.found_color }}
+                </div>
+
+                <div class="detail">
+                    <strong>Brand:</strong>
+                    {{ match.found_brand }}
+                </div>
+
+                <div class="detail">
+                    <strong>Found Date:</strong>
+                    {{ match.found_date }}
+                </div>
+
+                <div class="detail">
+                    <strong>Location:</strong>
+                    {{ match.found_location }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MATCH INFORMATION -->
+        <div class="match-box">
+
+            <h2>AI Match Result</h2>
+
+            {% if match.final_score is defined and match.final_score is not none %}
+
+                <div class="score">
+                    {{ "%.2f"|format(match.final_score) }}
+                </div>
+
+            {% else %}
+
+                <div class="score">
+                    Potential Match
+                </div>
+
+            {% endif %}
+
+            <div class="status">
+                Potential Match
+            </div>
+
+            <p>
+                Please compare both items carefully before confirming
+                that the found item belongs to you.
+            </p>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <div class="actions">
+
+            <form
+                action="{{ url_for('verify_match') }}"
+                method="POST"
+                style="display: inline;"
+            >
+
+                <input
+                    type="hidden"
+                    name="found_item_id"
+                    value="{{ match.found_id }}"
+                >
+
+                <input
+                    type="hidden"
+                    name="final_score"
+                    value="{{ match.final_score if match.final_score is defined else '' }}"
+                >
+
+                <button
+                    type="submit"
+                    name="verification"
+                    value="confirmed"
+                    class="btn confirm-btn"
+                >
+                    Yes, This Is My Item
+                </button>
+
+                <button
+                    type="submit"
+                    name="verification"
+                    value="rejected"
+                    class="btn reject-btn"
+                >
+                    No, Not My Item
+                </button>
+
+            </form>
+
+            <br>
+
+            <a
+                href="{{ url_for('notifications') }}"
+                class="home-btn"
+            >
+                Back to Notifications
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

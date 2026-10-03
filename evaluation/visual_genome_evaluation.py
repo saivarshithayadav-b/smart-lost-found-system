@@ -19,8 +19,13 @@ def evaluate_visual_genome():
 
     print("\n1. Loading CLIP model...")
 
-    model = CLIPModel.from_pretrained(MODEL_NAME)
-    processor = CLIPProcessor.from_pretrained(MODEL_NAME)
+    model = CLIPModel.from_pretrained(
+        MODEL_NAME
+    )
+
+    processor = CLIPProcessor.from_pretrained(
+        MODEL_NAME
+    )
 
     model.eval()
 
@@ -29,15 +34,21 @@ def evaluate_visual_genome():
     print("\n2. Loading Visual Genome dataset...")
 
     dataset = load_dataset(
-        "ranjaykrishna/visual_genome",
-        "region_descriptions_v1.0.0",
+        "visual_genome",
         split="train"
     )
 
     print("Visual Genome loaded successfully.")
-    print("Total images:", len(dataset))
 
-    total = min(NUM_SAMPLES, len(dataset))
+    print(
+        "Total images:",
+        len(dataset)
+    )
+
+    total = min(
+        NUM_SAMPLES,
+        len(dataset)
+    )
 
     print(
         "Samples used for evaluation:",
@@ -58,12 +69,14 @@ def evaluate_visual_genome():
         regions = sample["regions"]
 
         if image is None or not regions:
+
             continue
 
         # Take the first region description.
         phrase = regions[0]["phrase"]
 
         if not phrase:
+
             continue
 
         inputs = processor(
@@ -75,7 +88,9 @@ def evaluate_visual_genome():
 
         with torch.no_grad():
 
-            outputs = model(**inputs)
+            outputs = model(
+                **inputs
+            )
 
             logits = outputs.logits_per_image
 
@@ -121,4 +136,5 @@ def evaluate_visual_genome():
 
 
 if __name__ == "__main__":
+
     evaluate_visual_genome()

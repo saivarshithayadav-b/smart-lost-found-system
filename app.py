@@ -14,12 +14,15 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import get_db_connection
+
 # AI MATCHING PIPELINE
 from matching.database_matching import match_lost_item
+
 # FLASK APPLICATION
 app = Flask(__name__)
 
 app.secret_key = "lost-found-secret-key"
+
 # IMAGE UPLOAD SETTINGS
 UPLOAD_FOLDER = os.path.join(
     app.root_path,
@@ -35,6 +38,7 @@ ALLOWED_EXTENSIONS = {
     "gif"
 }
 
+
 def allowed_file(filename):
 
     return (
@@ -42,6 +46,8 @@ def allowed_file(filename):
         and filename.rsplit(".", 1)[1].lower()
         in ALLOWED_EXTENSIONS
     )
+
+
 # SERVE UPLOADED IMAGES
 @app.route("/uploads/<filename>")
 def uploaded_file(filename):
@@ -50,6 +56,8 @@ def uploaded_file(filename):
         app.config["UPLOAD_FOLDER"],
         filename
     )
+
+
 # HOME
 @app.route("/")
 def home():
@@ -85,6 +93,8 @@ def home():
         "index.html",
         unread_count=unread_count
     )
+
+
 # REGISTER
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -130,6 +140,8 @@ def register():
     return render_template(
         "register.html"
     )
+
+
 # LOGIN
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -178,6 +190,8 @@ def login():
     return render_template(
         "login.html"
     )
+
+
 # LOGOUT
 @app.route("/logout")
 def logout():
@@ -187,6 +201,8 @@ def logout():
     return redirect(
         url_for("home")
     )
+
+
 # REPORT LOST ITEM
 @app.route("/lost-item", methods=["GET", "POST"])
 def lost_item():
@@ -198,7 +214,9 @@ def lost_item():
         )
 
     if request.method == "POST":
+
         # GET FORM DATA
+
         item_name = request.form["item_name"]
 
         category = request.form["category"]
@@ -216,7 +234,27 @@ def lost_item():
         latitude = request.form["latitude"] or None
 
         longitude = request.form["longitude"] or None
+
+        # PRIVATE OWNERSHIP VERIFICATION DETAILS
+
+        verification_0 = request.form.get(
+            "verification_0"
+        )
+
+        verification_1 = request.form.get(
+            "verification_1"
+        )
+
+        verification_2 = request.form.get(
+            "verification_2"
+        )
+
+        verification_3 = request.form.get(
+            "verification_3"
+        )
+
         # IMAGE UPLOAD
+
         image = request.files.get("image")
 
         image_path = None
@@ -239,7 +277,9 @@ def lost_item():
             )
 
             image_path = filename
+
         # DATABASE INSERT
+
         connection = get_db_connection()
 
         cursor = connection.cursor()
@@ -258,10 +298,18 @@ def lost_item():
                 location,
                 latitude,
                 longitude,
-                image_path
+                image_path,
+                verification_0,
+                verification_1,
+                verification_2,
+                verification_3
             )
             VALUES
             (
+                %s,
+                %s,
+                %s,
+                %s,
                 %s,
                 %s,
                 %s,
@@ -286,7 +334,11 @@ def lost_item():
                 location,
                 latitude,
                 longitude,
-                image_path
+                image_path,
+                verification_0,
+                verification_1,
+                verification_2,
+                verification_3
             )
         )
 
@@ -296,7 +348,9 @@ def lost_item():
 
         cursor.close()
         connection.close()
+
         # GET COMPLETE LOST ITEM
+
         connection = get_db_connection()
 
         cursor = connection.cursor(
@@ -316,7 +370,9 @@ def lost_item():
 
         cursor.close()
         connection.close()
+
         # AI MATCHING
+
         matching_results = []
 
         if (
@@ -329,11 +385,15 @@ def lost_item():
                 lost_item_data,
                 radius_km=5
             )
+
         # STORE RESULTS IN SESSION
+
         session["matching_results"] = matching_results
 
         session["lost_item_id"] = lost_item_id
+
         # REDIRECT TO MATCH RESULTS
+
         return redirect(
             url_for("match_results")
         )
@@ -341,6 +401,8 @@ def lost_item():
     return render_template(
         "lost_item.html"
     )
+
+
 # MATCH RESULTS
 @app.route("/match-results")
 def match_results():
@@ -359,7 +421,9 @@ def match_results():
     lost_item_id = session.get(
         "lost_item_id"
     )
+
     # GET LOST ITEM IMAGE DIRECTLY FROM DATABASE
+
     lost_image = None
 
     if lost_item_id:
@@ -391,7 +455,9 @@ def match_results():
         if lost_item:
 
             lost_image = lost_item["image_path"]
+
     # GET FOUND ITEM IMAGES DIRECTLY FROM DATABASE
+
     for result in matching_results:
 
         result["lost_item_image"] = lost_image
@@ -429,12 +495,16 @@ def match_results():
                 found_image = found_item["image_path"]
 
         result["found_item_image"] = found_image
+
     # DISPLAY MATCH RESULTS
+
     return render_template(
         "match_results.html",
         matching_results=matching_results,
         lost_item_id=lost_item_id
     )
+
+
 # VERIFY MATCH
 @app.route("/verify-match", methods=["POST"])
 def verify_match():
@@ -444,7 +514,7 @@ def verify_match():
         return redirect(
             url_for("login")
         )
-    # GET DATA FROM FORM
+
     verification = request.form.get(
         "verification"
     )
@@ -464,7 +534,7 @@ def verify_match():
     user_id = session.get(
         "user_id"
     )
-    # VALIDATE DATA
+
     if verification not in (
         "confirmed",
         "rejected"
@@ -483,13 +553,15 @@ def verify_match():
     if not lost_item_id:
 
         return "Lost item ID is missing", 400
-    # CONNECT TO DATABASE
+
     connection = get_db_connection()
 
     cursor = connection.cursor(
         dictionary=True
     )
+
     # GET FOUND ITEM OWNER
+
     cursor.execute(
         """
         SELECT
@@ -513,7 +585,9 @@ def verify_match():
     found_item_owner_id = found_item["user_id"]
 
     found_item_name = found_item["item_name"]
+
     # SAVE VERIFICATION
+
     cursor.execute(
         """
         INSERT INTO match_verifications
@@ -541,7 +615,9 @@ def verify_match():
             verification
         )
     )
+
     # CREATE NOTIFICATION
+
     if verification == "confirmed":
 
         message = (
@@ -575,12 +651,12 @@ def verify_match():
                 found_item_id
             )
         )
-    # COMMIT
+
     connection.commit()
 
     cursor.close()
     connection.close()
-    # CONFIRMED
+
     if verification == "confirmed":
 
         return f"""
@@ -653,7 +729,7 @@ def verify_match():
 
         </html>
         """
-    # REJECTED
+
     return f"""
     <!DOCTYPE html>
 
@@ -719,6 +795,8 @@ def verify_match():
 
     </html>
     """
+
+
 # NOTIFICATIONS
 @app.route("/notifications")
 def notifications():
@@ -728,7 +806,7 @@ def notifications():
         return redirect(
             url_for("login")
         )
-    # GET CURRENT USER NOTIFICATIONS
+
     connection = get_db_connection()
 
     cursor = connection.cursor(
@@ -746,7 +824,7 @@ def notifications():
     )
 
     notifications = cursor.fetchall()
-    # GET UNREAD NOTIFICATION COUNT
+
     cursor.execute(
         """
         SELECT COUNT(*) AS unread_count
@@ -763,15 +841,170 @@ def notifications():
 
     cursor.close()
     connection.close()
-    # DISPLAY NOTIFICATIONS
+
     return render_template(
         "notifications.html",
         notifications=notifications,
         unread_count=unread_count
     )
+
+
 # MARK NOTIFICATION AS READ
 @app.route("/notifications/read/<int:notification_id>")
 def mark_notification_read(notification_id):
+
+    if "user_id" not in session:
+
+        return redirect(
+            url_for("login")
+        )
+
+    connection = get_db_connection()
+
+    cursor = connection.cursor(
+        dictionary=True
+    )
+
+    # GET NOTIFICATION DETAILS
+    cursor.execute(
+        """
+        SELECT
+            id,
+            related_lost_item_id,
+            related_found_item_id
+        FROM notifications
+        WHERE id = %s
+        AND user_id = %s
+        """,
+        (
+            notification_id,
+            session["user_id"]
+        )
+    )
+
+    notification = cursor.fetchone()
+
+    if not notification:
+
+        cursor.close()
+        connection.close()
+
+        return "Notification not found", 404
+
+    # MARK AS READ
+    cursor.execute(
+        """
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE id = %s
+        AND user_id = %s
+        """,
+        (
+            notification_id,
+            session["user_id"]
+        )
+    )
+
+    connection.commit()
+
+    cursor.close()
+    connection.close()
+
+    # IF THIS IS A MATCH NOTIFICATION
+    if (
+        notification["related_lost_item_id"]
+        and notification["related_found_item_id"]
+    ):
+
+        return redirect(
+            url_for(
+                "notification_match",
+                notification_id=notification_id
+            )
+        )
+
+    # NORMAL NOTIFICATION
+    return redirect(
+        url_for("notifications")
+    )
+
+
+# NOTIFICATION MATCH DETAILS
+@app.route("/notification-match/<int:notification_id>")
+def notification_match(notification_id):
+
+    if "user_id" not in session:
+
+        return redirect(
+            url_for("login")
+        )
+
+    connection = get_db_connection()
+
+    cursor = connection.cursor(
+        dictionary=True
+    )
+
+    cursor.execute(
+        """
+        SELECT
+
+            n.id AS notification_id,
+            n.message,
+            n.related_lost_item_id,
+            n.related_found_item_id,
+
+            l.id AS lost_id,
+            l.item_name AS lost_item_name,
+            l.category AS lost_category,
+            l.description AS lost_description,
+            l.color AS lost_color,
+            l.brand AS lost_brand,
+            l.lost_date,
+            l.location AS lost_location,
+            l.image_path AS lost_image,
+
+            f.id AS found_id,
+            f.item_name AS found_item_name,
+            f.category AS found_category,
+            f.description AS found_description,
+            f.color AS found_color,
+            f.brand AS found_brand,
+            f.found_date,
+            f.location AS found_location,
+            f.image_path AS found_image
+
+        FROM notifications n
+
+        LEFT JOIN lost_items l
+            ON n.related_lost_item_id = l.id
+
+        LEFT JOIN found_items f
+            ON n.related_found_item_id = f.id
+
+        WHERE n.id = %s
+        AND n.user_id = %s
+        """,
+        (
+            notification_id,
+            session["user_id"]
+        )
+    )
+
+    match = cursor.fetchone()
+
+    cursor.close()
+    connection.close()
+
+    if not match:
+
+        return "Match notification not found", 404
+
+    # RENDER THE MATCH PAGE
+    return render_template(
+        "notification_match.html",
+        match=match
+    )
 
     if "user_id" not in session:
 
@@ -804,6 +1037,9 @@ def mark_notification_read(notification_id):
     return redirect(
         url_for("notifications")
     )
+    
+
+
 # REPORT FOUND ITEM
 @app.route("/found-item", methods=["GET", "POST"])
 def found_item():
@@ -815,7 +1051,7 @@ def found_item():
         )
 
     if request.method == "POST":
-        # GET FORM DATA
+
         item_name = request.form["item_name"]
 
         category = request.form["category"]
@@ -833,7 +1069,9 @@ def found_item():
         latitude = request.form["latitude"] or None
 
         longitude = request.form["longitude"] or None
+
         # IMAGE UPLOAD
+
         image = request.files.get("image")
 
         image_path = None
@@ -856,7 +1094,9 @@ def found_item():
             )
 
             image_path = filename
+
         # DATABASE INSERT
+
         connection = get_db_connection()
 
         cursor = connection.cursor()
@@ -909,8 +1149,117 @@ def found_item():
 
         connection.commit()
 
+        found_item_id = cursor.lastrowid
+
         cursor.close()
         connection.close()
+
+        # ---------------------------------------------------------
+        # CHECK NEW FOUND ITEM AGAINST EXISTING LOST ITEMS
+        # ---------------------------------------------------------
+
+        if (
+            latitude is not None
+            and longitude is not None
+        ):
+
+            connection = get_db_connection()
+
+            cursor = connection.cursor(
+                dictionary=True
+            )
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM lost_items
+                WHERE user_id != %s
+                AND latitude IS NOT NULL
+                AND longitude IS NOT NULL
+                """,
+                (
+                    session["user_id"],
+                )
+            )
+
+            existing_lost_items = cursor.fetchall()
+
+            cursor.close()
+            connection.close()
+
+            # Run the existing matching pipeline for
+            # every existing lost item.
+
+            for lost_item_data in existing_lost_items:
+
+                try:
+
+                    matching_results = match_lost_item(
+                        lost_item_data,
+                        radius_km=5
+                    )
+
+                    for result in matching_results:
+
+                        if str(
+                            result.get("found_item_id")
+                        ) == str(found_item_id):
+
+                            final_score = result.get(
+                                "final_score",
+                                0
+                            )
+
+                            message = (
+                                f"Potential match found "
+                                f"for your lost item "
+                                f"'{lost_item_data['item_name']}' "
+                                f"with found item "
+                                f"'{item_name}'. "
+                                f"AI Match Score: "
+                                f"{final_score}"
+                            )
+
+                            connection = get_db_connection()
+
+                            cursor = connection.cursor()
+
+                            cursor.execute(
+                                """
+                                INSERT INTO notifications
+                                (
+                                    user_id,
+                                    message,
+                                    related_lost_item_id,
+                                    related_found_item_id
+                                )
+                                VALUES
+                                (
+                                    %s,
+                                    %s,
+                                    %s,
+                                    %s
+                                )
+                                """,
+                                (
+                                    lost_item_data["user_id"],
+                                    message,
+                                    lost_item_data["id"],
+                                    found_item_id
+                                )
+                            )
+
+                            connection.commit()
+
+                            cursor.close()
+                            connection.close()
+
+                except Exception as e:
+
+                    print(
+                        "Matching error:",
+                        e
+                    )
 
         return redirect(
             url_for("found_items")
@@ -919,10 +1268,12 @@ def found_item():
     return render_template(
         "found_item.html"
     )
+
+
 # VIEW MY LOST ITEMS + SEARCH
 @app.route("/lost-items")
 def lost_items():
-    # LOGIN REQUIRED
+
     if "user_id" not in session:
 
         return redirect(
@@ -939,7 +1290,7 @@ def lost_items():
     cursor = connection.cursor(
         dictionary=True
     )
-    # SEARCH ONLY MY LOST ITEMS
+
     if search:
 
         search_value = f"%{search}%"
@@ -980,7 +1331,7 @@ def lost_items():
                 search_value
             )
         )
-    # SHOW ONLY MY LOST ITEMS
+
     else:
 
         cursor.execute(
@@ -1016,10 +1367,12 @@ def lost_items():
         items=items,
         search=search
     )
+
+
 # VIEW MY FOUND ITEMS + SEARCH
 @app.route("/found-items")
 def found_items():
-    # LOGIN REQUIRED
+
     if "user_id" not in session:
 
         return redirect(
@@ -1036,7 +1389,7 @@ def found_items():
     cursor = connection.cursor(
         dictionary=True
     )
-    # SEARCH ONLY MY FOUND ITEMS
+
     if search:
 
         search_value = f"%{search}%"
@@ -1077,7 +1430,7 @@ def found_items():
                 search_value
             )
         )
-    # SHOW ONLY MY FOUND ITEMS
+
     else:
 
         cursor.execute(
@@ -1113,96 +1466,150 @@ def found_items():
         items=items,
         search=search
     )
+
+
 # DELETE LOST ITEM
 @app.route("/delete-lost-item/<int:item_id>", methods=["POST"])
 def delete_lost_item(item_id):
 
     if "user_id" not in session:
-        return redirect(url_for("login"))
+
+        return redirect(
+            url_for("login")
+        )
 
     connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
+
+    cursor = connection.cursor(
+        dictionary=True
+    )
 
     cursor.execute(
         """
-        SELECT image_path FROM lost_items
-        WHERE id = %s AND user_id = %s
+        SELECT image_path
+        FROM lost_items
+        WHERE id = %s
+        AND user_id = %s
         """,
-        (item_id, session["user_id"])
+        (
+            item_id,
+            session["user_id"]
+        )
     )
 
     item = cursor.fetchone()
 
     if not item:
+
         cursor.close()
         connection.close()
+
         return "Lost item not found or unauthorized", 404
 
     cursor.execute(
         """
         DELETE FROM lost_items
-        WHERE id = %s AND user_id = %s
+        WHERE id = %s
+        AND user_id = %s
         """,
-        (item_id, session["user_id"])
+        (
+            item_id,
+            session["user_id"]
+        )
     )
+
     connection.commit()
+
     cursor.close()
     connection.close()
 
     if item.get("image_path"):
+
         image_path = os.path.join(
             app.config["UPLOAD_FOLDER"],
             item["image_path"]
         )
+
         if os.path.isfile(image_path):
+
             os.remove(image_path)
 
-    return redirect(url_for("lost_items"))
+    return redirect(
+        url_for("lost_items")
+    )
+
+
 # DELETE FOUND ITEM
 @app.route("/delete-found-item/<int:item_id>", methods=["POST"])
 def delete_found_item(item_id):
 
     if "user_id" not in session:
-        return redirect(url_for("login"))
+
+        return redirect(
+            url_for("login")
+        )
 
     connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
+
+    cursor = connection.cursor(
+        dictionary=True
+    )
 
     cursor.execute(
         """
-        SELECT image_path FROM found_items
-        WHERE id = %s AND user_id = %s
+        SELECT image_path
+        FROM found_items
+        WHERE id = %s
+        AND user_id = %s
         """,
-        (item_id, session["user_id"])
+        (
+            item_id,
+            session["user_id"]
+        )
     )
 
     item = cursor.fetchone()
 
     if not item:
+
         cursor.close()
         connection.close()
+
         return "Found item not found or unauthorized", 404
 
     cursor.execute(
         """
         DELETE FROM found_items
-        WHERE id = %s AND user_id = %s
+        WHERE id = %s
+        AND user_id = %s
         """,
-        (item_id, session["user_id"])
+        (
+            item_id,
+            session["user_id"]
+        )
     )
+
     connection.commit()
+
     cursor.close()
     connection.close()
 
     if item.get("image_path"):
+
         image_path = os.path.join(
             app.config["UPLOAD_FOLDER"],
             item["image_path"]
         )
+
         if os.path.isfile(image_path):
+
             os.remove(image_path)
 
-    return redirect(url_for("found_items"))
+    return redirect(
+        url_for("found_items")
+    )
+
+
 # PROFILE
 @app.route("/profile")
 def profile():
@@ -1220,7 +1627,7 @@ def profile():
     )
 
     user_id = session["user_id"]
-    # GET USER DETAILS
+
     cursor.execute(
         """
         SELECT
@@ -1235,7 +1642,7 @@ def profile():
     )
 
     user = cursor.fetchone()
-    # GET MY LOST ITEMS
+
     cursor.execute(
         """
         SELECT *
@@ -1247,7 +1654,7 @@ def profile():
     )
 
     lost_items = cursor.fetchall()
-    # GET MY FOUND ITEMS
+
     cursor.execute(
         """
         SELECT *
@@ -1261,6 +1668,7 @@ def profile():
     found_items = cursor.fetchall()
 
     cursor.close()
+
     connection.close()
 
     return render_template(
@@ -1269,11 +1677,14 @@ def profile():
         lost_items=lost_items,
         found_items=found_items
     )
+
+
 # SETTINGS
 @app.route("/settings")
 def settings():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1281,11 +1692,14 @@ def settings():
     return render_template(
         "settings.html"
     )
+
+
 # PROFILE SETTINGS
 @app.route("/profile-settings")
 def profile_settings():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1311,17 +1725,21 @@ def profile_settings():
     user = cursor.fetchone()
 
     cursor.close()
+
     connection.close()
 
     return render_template(
         "profile_settings.html",
         user=user
     )
+
+
 # ACCOUNT & SECURITY
 @app.route("/account-settings")
 def account_settings():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1329,11 +1747,14 @@ def account_settings():
     return render_template(
         "account_settings.html"
     )
+
+
 # PRIVACY
 @app.route("/privacy")
 def privacy():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1341,11 +1762,14 @@ def privacy():
     return render_template(
         "privacy.html"
     )
+
+
 # HELP & SUPPORT
 @app.route("/help-support")
 def help_support():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1353,11 +1777,14 @@ def help_support():
     return render_template(
         "help_support.html"
     )
+
+
 # ABOUT
 @app.route("/about")
 def about():
 
     if "user_id" not in session:
+
         return redirect(
             url_for("login")
         )
@@ -1365,6 +1792,8 @@ def about():
     return render_template(
         "about.html"
     )
+
+
 # RUN APPLICATION
 if __name__ == "__main__":
 
