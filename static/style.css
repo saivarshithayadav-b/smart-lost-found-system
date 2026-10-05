@@ -614,6 +614,118 @@ input[type="file"]::file-selector-button:hover {
 
 
 /* =====================================================
+   LOGIN PAGE
+   ===================================================== */
+
+.login-container {
+    background-color: white;
+
+    width: 100%;
+    max-width: 450px;
+
+    margin: 60px auto;
+
+    padding: 35px;
+
+    border-radius: 12px;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.login-container h1 {
+    text-align: center;
+
+    color: #1e3a8a;
+
+    margin-bottom: 30px;
+}
+
+.login-container form {
+    width: 100%;
+}
+
+.login-container label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-weight: bold;
+}
+
+.login-container input {
+    width: 100%;
+
+    padding: 11px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    font-size: 15px;
+
+    margin-bottom: 18px;
+}
+
+.login-container input:focus {
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.login-container button {
+    width: 100%;
+
+    border: none;
+
+    border-radius: 8px;
+
+    padding: 13px;
+
+    background-color: #2563eb;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background-color: #1d4ed8;
+}
+
+.login-container p {
+    text-align: center;
+
+    color: #555;
+
+    margin-top: 25px;
+}
+
+.login-container a {
+    display: block;
+
+    text-align: center;
+
+    color: #2563eb;
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+    margin-top: 10px;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+
+/* =====================================================
    MOBILE RESPONSIVE
    ===================================================== */
 
@@ -671,6 +783,14 @@ input[type="file"]::file-selector-button:hover {
 
     .location-section {
         padding: 16px;
+    }
+
+    .login-container {
+        width: 90%;
+
+        padding: 25px;
+
+        margin: 35px auto;
     }
 
 }
