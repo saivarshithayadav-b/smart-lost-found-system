@@ -15,7 +15,7 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
-SET @@SESSION.SQL_LOG_BIN= 0;
+SET @@SESSION.SQL_LOG_BIN = 0;
 
 --
 -- GTID state at the beginning of the backup
@@ -30,7 +30,7 @@ SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '2e651a3e-b75a-11f1-9ad2-df356c7b2750:1-
 
 DROP TABLE IF EXISTS `found_items`;
 
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 
 CREATE TABLE `found_items` (
@@ -112,7 +112,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `lost_items`;
 
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 
 CREATE TABLE `lost_items` (
@@ -306,7 +306,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `users`;
 
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 
 CREATE TABLE `users` (
@@ -314,6 +314,7 @@ CREATE TABLE `users` (
   `name` varchar(100) NOT NULL,
   `email` varchar(150) NOT NULL,
   `password` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`id`),
@@ -341,6 +342,7 @@ VALUES
   'varshitha',
   'saivarshithayadav@gmail.com',
   'REPLACE_WITH_A_HASHED_PASSWORD',
+  NULL,
   '2026-09-23 15:29:26'
 ),
 (
@@ -348,6 +350,7 @@ VALUES
   'varsh',
   'ponky@gmail.com',
   'scrypt:32768:8:1$lmjcHOqC3OV9QTKH$76c53aba317accb6ecd57bae76273a2c85f488e29acd7dda214776338c1acf15e17576f38ab4167b4a8a9954ee725b73aad0e6e16b7caef74108014e6e2b772c',
+  NULL,
   '2026-09-23 15:33:52'
 );
 
@@ -359,9 +362,9 @@ UNLOCK TABLES;
 SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_NOTES=@OLD_SQL_NOTES */;

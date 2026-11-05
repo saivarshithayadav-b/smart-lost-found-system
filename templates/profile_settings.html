@@ -224,24 +224,17 @@
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
                     <input
-                        type="text"
+                        type="tel"
                         id="phone"
                         name="phone"
                         value="{{ user.phone if user else '' }}"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="college">College / Organization</label>
-                    <input
-                        type="text"
-                        id="college"
-                        name="college"
-                        value="{{ user.college if user else '' }}"
+                        placeholder="+91XXXXXXXXXX"
+                        required
                     >
                 </div>
 
                 <div class="button-container">
+
                     <button type="submit" class="save-btn">
                         Save Changes
                     </button>
@@ -253,6 +246,7 @@
                     >
                         Cancel
                     </button>
+
                 </div>
 
             </form>

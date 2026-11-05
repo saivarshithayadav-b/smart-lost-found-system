@@ -10,28 +10,78 @@
     <div class="login-container">
         <div class="form-header">
             <h1>Create Account</h1>
-            <p>Create your Smart Lost & Found account</p>
+            <p>Create your Smart Lost &amp; Found account</p>
         </div>
 
-        <form method="POST">
+        <form method="POST" action="{{ url_for('register') }}">
             <div class="form-group">
-                <label>Name:</label>
-                <input type="text" name="name" placeholder="Enter your name" required>
+                <label for="name">Name:</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your name"
+                    autocomplete="name"
+                    required
+                >
             </div>
 
             <div class="form-group">
-                <label>Email:</label>
-                <input type="email" name="email" placeholder="Enter your email" required>
+                <label for="email">Email:</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
+                    required
+                >
             </div>
 
             <div class="form-group">
-                <label>Phone Number:</label>
-                <input type="tel" name="phone" placeholder="+91XXXXXXXXXX" required>
+                <label for="country_code">Country:</label>
+                <select id="country_code" name="country_code" required>
+                    <option value="+91" selected>India (+91)</option>
+                    <option value="+1">United States / Canada (+1)</option>
+                    <option value="+44">United Kingdom (+44)</option>
+                    <option value="+61">Australia (+61)</option>
+                    <option value="+971">United Arab Emirates (+971)</option>
+                    <option value="+65">Singapore (+65)</option>
+                    <option value="+60">Malaysia (+60)</option>
+                    <option value="+81">Japan (+81)</option>
+                    <option value="+49">Germany (+49)</option>
+                    <option value="+33">France (+33)</option>
+                </select>
             </div>
 
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" placeholder="Create a password" required>
+                <label for="phone">Phone Number:</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter 10-digit phone number"
+                    inputmode="numeric"
+                    pattern="[0-9]{10}"
+                    minlength="10"
+                    maxlength="10"
+                    autocomplete="tel-national"
+                    title="Enter exactly 10 digits without the country code."
+                    required
+                >
+                <small>Enter 10 digits without the country code.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Create a password"
+                    autocomplete="new-password"
+                    required
+                >
             </div>
 
             <button type="submit" class="submit-button">Register</button>
