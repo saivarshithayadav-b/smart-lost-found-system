@@ -1,0 +1,13 @@
+Flask
+gunicorn
+mysql-connector-python
+python-dotenv
+twilio
+Werkzeug
+sentence-transformers
+scikit-learn
+Pillow
+torch
+transformers
+datasets
+scipy
