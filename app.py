@@ -283,6 +283,53 @@ def home():
         "index.html",
         unread_count=unread_count
     )
+    # API: FETCH LIVE NOTIFICATIONS
+@app.route("/api/notifications")
+def get_live_notifications():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login"
+        }), 401
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT id, message
+            FROM notifications
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+            """,
+            (session["user_id"],)
+        )
+
+        notification_list = cursor.fetchall()
+
+        cursor.execute(
+            """
+            SELECT COUNT(*) AS unread_count
+            FROM notifications
+            WHERE user_id = %s
+            AND is_read = FALSE
+            """,
+            (session["user_id"],)
+        )
+
+        unread_result = cursor.fetchone()
+
+        return jsonify({
+            "success": True,
+            "unread_count": unread_result["unread_count"],
+            "notifications": notification_list
+        })
+
+    finally:
+        cursor.close()
+        connection.close()
 
 
 # NORMALIZE PHONE NUMBER
@@ -603,12 +650,12 @@ def lost_item():
                     "Please log in to review and verify the match."
                 )
                 notify_cursor.execute(
-                    """
-                    INSERT INTO notifications
-                    (user_id, message, related_lost_item_id, related_found_item_id)
-                    VALUES (%s, %s, %s, %s)
+                    """ INSERT INTO notifications
+                    (user_id,message,related_lost_item_id,related_found_item_id,final_score)
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
-                    (found_owner["user_id"], message, lost_item_id, found_item_id)
+                    (found_owner["user_id"],message,lost_item_id,found_item_id,final_score
+                    )
                 )
                 notify_connection.commit()
                 print(f"Potential-match notification created for user {found_owner['user_id']}.")
@@ -766,6 +813,7 @@ def view_user_profile(profile_user_id):
 
 
 # VERIFY MATCH
+
 @app.route("/verify-match", methods=["POST"])
 def verify_match():
     if "user_id" not in session:
@@ -779,10 +827,13 @@ def verify_match():
 
     if verification not in ("confirmed", "rejected"):
         return "Invalid verification status", 400
+
     if not found_item_id:
         return "Found item ID is missing", 400
+
     if final_score is None or final_score == "":
         return "Final score is missing", 400
+
     if not lost_item_id:
         return "Lost item ID is missing", 400
 
@@ -790,7 +841,6 @@ def verify_match():
     cursor = connection.cursor(dictionary=True)
 
     try:
-        # Fetch both parties and the item details for this potential match.
         cursor.execute(
             """
             SELECT
@@ -814,6 +864,7 @@ def verify_match():
             """,
             (found_item_id, lost_item_id)
         )
+
         parties = cursor.fetchone()
 
         if not parties:
@@ -822,22 +873,16 @@ def verify_match():
         owner_id = parties["owner_id"]
         finder_id = parties["finder_id"]
 
-        if user_id not in (owner_id, finder_id):
-            return "You are not allowed to verify this match", 403
+        # Only the lost-item owner can approve or reject.
+        if user_id != owner_id:
+            return "Only the lost-item owner can verify this match", 403
 
         if owner_id == finder_id:
             return "You cannot verify a match between your own items", 400
 
-        # The current user's approval is stored in the correct column.
-        approval_column = (
-            "owner_approval" if user_id == owner_id else "finder_approval"
-        )
-        approval_value = "accepted" if verification == "confirmed" else "rejected"
-
-        # Find an existing verification row for this pair.
         cursor.execute(
             """
-            SELECT id, verification_status, owner_approval, finder_approval
+            SELECT id, verification_status, owner_approval
             FROM match_verifications
             WHERE lost_item_id = %s AND found_item_id = %s
             ORDER BY id DESC
@@ -845,27 +890,52 @@ def verify_match():
             """,
             (lost_item_id, found_item_id)
         )
+
         match = cursor.fetchone()
 
         if match and match["verification_status"] == "rejected":
             return "This match has already been rejected", 400
 
-        already_fully_approved = bool(
+        already_confirmed = bool(
             match
             and match["verification_status"] == "confirmed"
             and match["owner_approval"] == "accepted"
-            and match["finder_approval"] == "accepted"
         )
 
-        if not match:
-            owner_approval = (
-                approval_value if user_id == owner_id else "pending"
-            )
-            finder_approval = (
-                approval_value if user_id == finder_id else "pending"
-            )
-            status = "rejected" if verification == "rejected" else "pending"
+        if verification == "rejected":
+            if match:
+                cursor.execute(
+                    """
+                    UPDATE match_verifications
+                    SET owner_approval = 'rejected',
+                        verification_status = 'rejected'
+                    WHERE id = %s
+                    """,
+                    (match["id"],)
+                )
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO match_verifications
+                    (
+                        lost_item_id,
+                        found_item_id,
+                        user_id,
+                        final_score,
+                        verification_status,
+                        owner_approval,
+                        finder_approval
+                    )
+                    VALUES (%s, %s, %s, %s, 'rejected', 'rejected', 'pending')
+                    """,
+                    (lost_item_id, found_item_id, user_id, final_score)
+                )
 
+            connection.commit()
+            return "Match rejected. Chat remains unavailable.", 200
+
+        # Owner accepts: finder approval is not required.
+        if not match:
             cursor.execute(
                 """
                 INSERT INTO match_verifications
@@ -878,143 +948,91 @@ def verify_match():
                     owner_approval,
                     finder_approval
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, 'confirmed', 'accepted', 'pending')
                 """,
-                (
-                    lost_item_id,
-                    found_item_id,
-                    user_id,
-                    final_score,
-                    status,
-                    owner_approval,
-                    finder_approval
-                )
+                (lost_item_id, found_item_id, user_id, final_score)
             )
-            match_id = cursor.lastrowid
-
-            if verification == "rejected":
-                connection.commit()
-                return "Match rejected. Chat remains unavailable.", 200
         else:
-            match_id = match["id"]
-            if verification == "rejected":
-                cursor.execute(
-                    f"""
-                    UPDATE match_verifications
-                    SET {approval_column} = 'rejected',
-                        verification_status = 'rejected'
-                    WHERE id = %s
-                    """,
-                    (match_id,)
-                )
-                connection.commit()
-                return "Match rejected. Chat remains unavailable.", 200
-
-            cursor.execute(
-                f"""
-                UPDATE match_verifications
-                SET {approval_column} = 'accepted'
-                WHERE id = %s
-                """,
-                (match_id,)
-            )
-
-        # Read the saved approvals after this user's decision.
-        cursor.execute(
-            """
-            SELECT owner_approval, finder_approval, verification_status
-            FROM match_verifications
-            WHERE id = %s
-            """,
-            (match_id,)
-        )
-        approvals = cursor.fetchone()
-
-        both_accepted = (
-            approvals["owner_approval"] == "accepted"
-            and approvals["finder_approval"] == "accepted"
-        )
-
-        if both_accepted:
             cursor.execute(
                 """
                 UPDATE match_verifications
-                SET verification_status = 'confirmed'
+                SET user_id = %s,
+                    final_score = %s,
+                    owner_approval = 'accepted',
+                    verification_status = 'confirmed'
                 WHERE id = %s
                 """,
-                (match_id,)
+                (user_id, final_score, match["id"])
             )
 
-            if not already_fully_approved:
-                score_for_message = final_score
+        if not already_confirmed:
+            owner_message = (
+                f"Match confirmed: your lost item "
+                f"'{parties['lost_item_name']}' matches the found item "
+                f"'{parties['found_item_name']}'. "
+                f"AI Match Score: {final_score}. "
+                "Private chat is now available."
+            )
 
-                # Notify both users only after both independently approve.
-                owner_message = (
-                    f"Match confirmed: your lost item "
-                    f"'{parties['lost_item_name']}' matches the found item "
-                    f"'{parties['found_item_name']}'. "
-                    f"AI Match Score: {score_for_message}. "
-                    "You may now continue through the app."
-                )
-                finder_message = (
-                    f"Match confirmed: your found item "
-                    f"'{parties['found_item_name']}' matches the lost item "
-                    f"'{parties['lost_item_name']}'. "
-                    f"AI Match Score: {score_for_message}. "
-                    "You may now continue through the app."
-                )
+            finder_message = (
+                f"Match confirmed: your found item "
+                f"'{parties['found_item_name']}' matches the lost item "
+                f"'{parties['lost_item_name']}'. "
+                f"AI Match Score: {final_score}. "
+                "Private chat is now available."
+            )
 
-                cursor.execute(
-                    """
-                    INSERT INTO notifications
-                    (
-                        user_id, message,
-                        related_lost_item_id, related_found_item_id
-                    )
-                    VALUES (%s, %s, %s, %s), (%s, %s, %s, %s)
-                    """,
-                    (
-                        owner_id, owner_message, lost_item_id, found_item_id,
-                        finder_id, finder_message, lost_item_id, found_item_id
-                    )
-                )
+            cursor.execute(
+    """
+    INSERT INTO notifications
+    (
+        user_id,
+        message,
+        related_lost_item_id,
+        related_found_item_id,
+        final_score
+    )
+    VALUES (%s, %s, %s, %s, %s),
+           (%s, %s, %s, %s, %s)
+    """,
+    (
+        owner_id, owner_message, lost_item_id, found_item_id, final_score,
+        finder_id, finder_message, lost_item_id, found_item_id, final_score
+    )
+)
 
         connection.commit()
 
-        if both_accepted and not already_fully_approved:
-            # Send the SMS alerts after the database transaction is committed.
+        if not already_confirmed:
             notify_match_channels(
-                parties["owner_phone"], parties.get("owner_email"),
-                parties["lost_item_name"], parties["found_item_name"],
+                parties["owner_phone"],
+                parties.get("owner_email"),
+                parties["lost_item_name"],
+                parties["found_item_name"],
                 final_score,
                 recipient_name=parties.get("owner_name"),
                 other_person_name=parties.get("finder_name"),
                 recipient_role="owner"
             )
+
             notify_match_channels(
-                parties["finder_phone"], parties.get("finder_email"),
-                parties["lost_item_name"], parties["found_item_name"],
+                parties["finder_phone"],
+                parties.get("finder_email"),
+                parties["lost_item_name"],
+                parties["found_item_name"],
                 final_score,
                 recipient_name=parties.get("finder_name"),
                 other_person_name=parties.get("owner_name"),
                 recipient_role="finder"
             )
-            # After confirming, open the other participant's public profile.
-            other_user_id = finder_id if user_id == owner_id else owner_id
-            return redirect(url_for("view_user_profile", profile_user_id=other_user_id, match_score=final_score))
 
-        if both_accepted:
-            other_user_id = finder_id if user_id == owner_id else owner_id
-            return redirect(url_for("view_user_profile", profile_user_id=other_user_id, match_score=final_score))
-
-        # Even while waiting for the other person's approval, let the user
-        # view the other participant's public profile.
-        other_user_id = finder_id if user_id == owner_id else owner_id
-        session["match_status_message"] = (
-            "Your approval has been saved. The match score is shown on the match results page; "
-            "the match is not confirmed until both people approve."
+        return redirect(
+            url_for(
+                "private_chat",
+                lost_item_id=lost_item_id,
+                found_item_id=found_item_id
+            )
         )
-        return redirect(url_for("view_user_profile", profile_user_id=other_user_id, match_score=final_score))
 
     except Exception:
         connection.rollback()
@@ -1024,6 +1042,245 @@ def verify_match():
         cursor.close()
         connection.close()
 
+
+
+# PRIVATE CHAT
+
+@app.route("/chat/<int:lost_item_id>/<int:found_item_id>")
+def private_chat(lost_item_id, found_item_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT
+                li.user_id AS owner_id,
+                fi.user_id AS finder_id,
+                owner.name AS owner_name,
+                finder.name AS finder_name,
+                mv.verification_status
+            FROM lost_items li
+            JOIN found_items fi ON fi.id = %s
+            JOIN users owner ON owner.id = li.user_id
+            JOIN users finder ON finder.id = fi.user_id
+            JOIN match_verifications mv
+                ON mv.lost_item_id = li.id
+                AND mv.found_item_id = fi.id
+            WHERE li.id = %s
+            ORDER BY mv.id DESC
+            LIMIT 1
+            """,
+            (found_item_id, lost_item_id)
+        )
+
+        match = cursor.fetchone()
+
+        if not match:
+            return "Match not found", 404
+
+        if user_id not in (match["owner_id"], match["finder_id"]):
+            return "You are not allowed to access this chat", 403
+
+        if match["verification_status"] != "confirmed":
+            return "Chat is available only after owner confirmation", 403
+
+        other_person = (
+            match["finder_name"]
+            if user_id == match["owner_id"]
+            else match["owner_name"]
+        )
+
+        return render_template(
+            "chat.html",
+            lost_item_id=lost_item_id,
+            found_item_id=found_item_id,
+            other_person=other_person
+        )
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.route("/api/chat/<int:lost_item_id>/<int:found_item_id>", methods=["GET"])
+def get_chat_messages(lost_item_id, found_item_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Please login"}), 401
+
+    user_id = session["user_id"]
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT li.user_id AS owner_id, fi.user_id AS finder_id
+            FROM lost_items li
+            JOIN found_items fi ON fi.id = %s
+            JOIN match_verifications mv
+                ON mv.lost_item_id = li.id
+                AND mv.found_item_id = fi.id
+            WHERE li.id = %s
+              AND mv.verification_status = 'confirmed'
+            ORDER BY mv.id DESC
+            LIMIT 1
+            """,
+            (found_item_id, lost_item_id)
+        )
+
+        match = cursor.fetchone()
+
+        if not match or user_id not in (match["owner_id"], match["finder_id"]):
+            return jsonify({"success": False, "message": "Chat not available"}), 403
+
+                # Mark messages received by the current user as read
+        cursor.execute(
+            """
+            UPDATE chat_messages
+            SET is_read = 1
+            WHERE lost_item_id = %s
+              AND found_item_id = %s
+              AND receiver_id = %s
+              AND is_read = 0
+            """,
+            (lost_item_id, found_item_id, user_id)
+        )
+        connection.commit()
+
+        # Fetch all messages in this conversation
+        cursor.execute(
+            """
+            SELECT
+                id,
+                sender_id,
+                receiver_id,
+                message,
+                created_at,
+                is_read
+            FROM chat_messages
+            WHERE lost_item_id = %s
+              AND found_item_id = %s
+              AND (
+                  (sender_id = %s AND receiver_id = %s)
+                  OR
+                  (sender_id = %s AND receiver_id = %s)
+              )
+            ORDER BY created_at ASC, id ASC
+            """,
+            (
+                lost_item_id, found_item_id,
+                match["owner_id"], match["finder_id"],
+                match["finder_id"], match["owner_id"]
+            )
+        )
+
+        messages = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "current_user_id": user_id,
+            "messages": messages
+        })
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.route("/api/chat/<int:lost_item_id>/<int:found_item_id>", methods=["POST"])
+def send_chat_message(lost_item_id, found_item_id):
+    if "user_id" not in session:
+        return jsonify({"success": False, "message": "Please login"}), 401
+
+    user_id = session["user_id"]
+    data = request.get_json(silent=True) or {}
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({"success": False, "message": "Message cannot be empty"}), 400
+
+    if len(message) > 2000:
+        return jsonify({"success": False, "message": "Message is too long"}), 400
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            """
+            SELECT li.user_id AS owner_id, fi.user_id AS finder_id
+            FROM lost_items li
+            JOIN found_items fi ON fi.id = %s
+            JOIN match_verifications mv
+                ON mv.lost_item_id = li.id
+                AND mv.found_item_id = fi.id
+            WHERE li.id = %s
+              AND mv.verification_status = 'confirmed'
+            ORDER BY mv.id DESC
+            LIMIT 1
+            """,
+            (found_item_id, lost_item_id)
+        )
+
+        match = cursor.fetchone()
+
+        if not match or user_id not in (match["owner_id"], match["finder_id"]):
+            return jsonify({"success": False, "message": "Chat not available"}), 403
+
+        receiver_id = (
+            match["finder_id"]
+            if user_id == match["owner_id"]
+            else match["owner_id"]
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO chat_messages
+            (lost_item_id, found_item_id, sender_id, receiver_id, message)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (lost_item_id, found_item_id, user_id, receiver_id, message)
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO notifications
+            (
+                user_id,
+                message,
+                related_lost_item_id,
+                related_found_item_id,
+                final_score
+            )
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                receiver_id,
+                "You received a new chat message.",
+                lost_item_id,
+                found_item_id,
+                None
+            )
+        )
+
+        connection.commit()
+
+        return jsonify({"success": True, "message": "Message sent"})
+
+    except Exception:
+        connection.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        connection.close()
+
+        
 
 # NOTIFICATIONS
 @app.route("/notifications")
@@ -1154,6 +1411,7 @@ def notification_match(notification_id):
         SELECT
             n.id AS notification_id,
             n.message,
+            n.final_score,
             n.related_lost_item_id,
             n.related_found_item_id,
             l.id AS lost_id,
@@ -1165,7 +1423,9 @@ def notification_match(notification_id):
             l.lost_date,
             l.location AS lost_location,
             l.image_path AS lost_image,
+            l.user_id AS owner_id,
             f.id AS found_id,
+            f.user_id AS finder_id,
             f.item_name AS found_item_name,
             f.category AS found_category,
             f.description AS found_description,
@@ -1196,7 +1456,8 @@ def notification_match(notification_id):
     # RENDER THE MATCH PAGE
     return render_template(
         "notification_match.html",
-        match=match
+        match=match,
+        current_user_id=session["user_id"]
     )
 
 
@@ -1350,29 +1611,26 @@ def found_item():
                                 """
                                 INSERT INTO notifications
                                 (
-                                    user_id,
-                                    message,
-                                    related_lost_item_id,
-                                    related_found_item_id
+                                user_id,
+                                message,
+                                related_lost_item_id,
+                                related_found_item_id,
+                                final_score
                                 )
-                                VALUES
-                                (
-                                    %s,
-                                    %s,
-                                    %s,
-                                    %s
-                                )
+                                VALUES (%s, %s, %s, %s, %s)
                                 """,
                                 (
                                     lost_item_data["user_id"],
                                     message,
                                     lost_item_data["id"],
-                                    found_item_id
+                                    found_item_id,
+                                    final_score
                                 )
                             )
                             connection.commit()
                             cursor.close()
                             connection.close()
+                            
 
                             # SEND SMS ALERT TO LOST ITEM OWNER
                             connection = get_db_connection()

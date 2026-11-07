@@ -1,17 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
     <title>Notifications | Smart Lost & Found</title>
 
     <style>
-
         * {
             margin: 0;
             padding: 0;
@@ -143,7 +141,7 @@
             color: #64748b;
         }
 
-        /* BUTTON */
+        /* BUTTONS */
 
         .read-button {
             display: inline-block;
@@ -154,10 +152,19 @@
             border-radius: 7px;
             font-size: 14px;
             font-weight: bold;
+            margin: 3px 3px 3px 0;
         }
 
         .read-button:hover {
             background: #1d4ed8;
+        }
+
+        .chat-button {
+            background: #16a34a;
+        }
+
+        .chat-button:hover {
+            background: #15803d;
         }
 
         /* EMPTY STATE */
@@ -201,7 +208,6 @@
         /* MOBILE */
 
         @media (max-width: 600px) {
-
             nav {
                 padding: 15px 20px;
             }
@@ -224,66 +230,43 @@
             .header h1 {
                 font-size: 26px;
             }
-
         }
-
     </style>
-
 </head>
 
-
 <body>
-
 
     <!-- NAVBAR -->
 
     <nav>
-
         <div class="logo">
-             Smart Lost & Found 🔎
+            Smart Lost & Found 🔎
         </div>
 
         <div class="nav-links">
-
-            <a href="/">
-                Home
-            </a>
+            <a href="/">Home</a>
 
             <a href="{{ url_for('notifications') }}">
                 🔔 Notifications
             </a>
-
         </div>
-
     </nav>
-
 
     <!-- MAIN CONTENT -->
 
     <div class="container">
 
-
         <div class="header">
-
-            <h1>
-                🔔 Notifications
-            </h1>
+            <h1>🔔 Notifications</h1>
 
             <div class="unread">
-
-                Unread:
-                {{ unread_count }}
-
+                Unread: {{ unread_count }}
             </div>
-
         </div>
-
 
         {% if notifications %}
 
-
             {% for notification in notifications %}
-
 
                 <div class="notification-card
                     {% if notification['is_read'] %}
@@ -291,78 +274,54 @@
                     {% endif %}
                 ">
 
-
                     <div class="notification-title">
 
-                        🔔 Match Notification
+                        {% if 'chat message' in notification['message']|trim|lower %}
+                            💬 New Chat Message
+                        {% else %}
+                            🔔 Match Notification
+                        {% endif %}
 
                     </div>
-
 
                     <div class="message">
-
                         {{ notification["message"] }}
-
                     </div>
-
 
                     <div class="details">
 
                         <p>
-                            <strong>
-                                Lost Item ID:
-                            </strong>
-
+                            <strong>Lost Item ID:</strong>
                             {{ notification["related_lost_item_id"] }}
-
                         </p>
 
-
                         <p>
-                            <strong>
-                                Found Item ID:
-                            </strong>
-
+                            <strong>Found Item ID:</strong>
                             {{ notification["related_found_item_id"] }}
-
                         </p>
 
-
                         <p>
-
-                            <strong>
-                                Status:
-                            </strong>
+                            <strong>Status:</strong>
 
                             {% if notification["is_read"] %}
-
                                 <span class="status read-status">
                                     ✓ Read
                                 </span>
-
                             {% else %}
-
                                 <span class="status unread-status">
                                     ● Unread
                                 </span>
-
                             {% endif %}
-
                         </p>
 
-
                         <p>
-
-                            <strong>
-                                Created:
-                            </strong>
-
+                            <strong>Created:</strong>
                             {{ notification["created_at"] }}
-
                         </p>
 
                     </div>
 
+                    <!-- MARK AS READ -->
 
                     {% if not notification["is_read"] %}
 
@@ -373,22 +332,45 @@
                                 notification_id=notification['id']
                             ) }}"
                         >
-
                             ✓ Mark as Read
-
                         </a>
 
                     {% endif %}
 
+                    <!-- OPEN BUTTON -->
+
+                    <a
+                        class="read-button"
+                        href="{{ url_for(
+                            'notification_match',
+                            notification_id=notification['id']
+                        ) }}"
+                    >
+                        Open →
+                    </a>
+
+                    <!-- CHAT BUTTON -->
+
+                    {% if 'chat message' in notification['message']|trim|lower %}
+
+                        <a
+                            class="read-button chat-button"
+                            href="{{ url_for(
+                                'private_chat',
+                                lost_item_id=notification['related_lost_item_id'],
+                                found_item_id=notification['related_found_item_id']
+                            ) }}"
+                        >
+                            💬 Chat
+                        </a>
+
+                    {% endif %}
 
                 </div>
 
-
             {% endfor %}
 
-
         {% else %}
-
 
             <div class="empty">
 
@@ -396,9 +378,7 @@
                     🔔
                 </div>
 
-                <h2>
-                    No Notifications
-                </h2>
+                <h2>No Notifications</h2>
 
                 <p>
                     You don't have any notifications yet.
@@ -406,18 +386,13 @@
 
             </div>
 
-
         {% endif %}
-
 
         <a class="back" href="/">
             ← Back to Home
         </a>
 
-
     </div>
 
-
 </body>
-
 </html>

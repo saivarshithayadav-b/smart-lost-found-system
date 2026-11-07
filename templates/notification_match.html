@@ -197,8 +197,12 @@
             <div class="card">
 
                 <h2 class="lost-title">
-                    Your Lost Item
-                </h2>
+    {% if current_user_id == match.owner_id %}
+        Your Lost Item
+    {% else %}
+        Lost Item
+    {% endif %}
+</h2>
 
                 {% if match.lost_image %}
 
@@ -256,10 +260,13 @@
 
             <!-- FOUND ITEM -->
             <div class="card">
-
                 <h2 class="found-title">
-                    Found Item
-                </h2>
+    {% if current_user_id == match.finder_id %}
+        You Reported This Found Item
+    {% else %}
+        Found Item
+    {% endif %}
+</h2>
 
                 {% if match.found_image %}
 
@@ -349,58 +356,65 @@
 
 
         <!-- ACTIONS -->
-        <div class="actions">
+        <!-- ACTIONS -->
+<div class="actions">
 
-            <form
-                action="{{ url_for('verify_match') }}"
-                method="POST"
-                style="display: inline;"
+    {% if current_user_id == match.owner_id %}
+
+        <form
+            action="{{ url_for('verify_match') }}"
+            method="POST"
+            style="display: inline;"
+        >
+
+            <input
+                type="hidden"
+                name="found_item_id"
+                value="{{ match.found_id }}"
             >
 
-                <input
-                    type="hidden"
-                    name="found_item_id"
-                    value="{{ match.found_id }}"
-                >
-
-                <input
-                    type="hidden"
-                    name="final_score"
-                    value="{{ match.final_score if match.final_score is defined else '' }}"
-                >
-
-                <button
-                    type="submit"
-                    name="verification"
-                    value="confirmed"
-                    class="btn confirm-btn"
-                >
-                    Yes, This Is My Item
-                </button>
-
-                <button
-                    type="submit"
-                    name="verification"
-                    value="rejected"
-                    class="btn reject-btn"
-                >
-                    No, Not My Item
-                </button>
-
-            </form>
-
-            <br>
-
-            <a
-                href="{{ url_for('notifications') }}"
-                class="home-btn"
+            <input
+                type="hidden"
+                name="final_score"
+                value="{{ match.final_score if match.final_score is defined else '' }}"
             >
-                Back to Notifications
-            </a>
 
-        </div>
+            <button
+                type="submit"
+                name="verification"
+                value="confirmed"
+                class="btn confirm-btn"
+            >
+                Yes, This Is My Item
+            </button>
 
-    </div>
+            <button
+                type="submit"
+                name="verification"
+                value="rejected"
+                class="btn reject-btn"
+            >
+                No, Not My Item
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <p>
+            The lost-item owner will review this match.
+            You will receive a notification when they respond.
+        </p>
+
+    {% endif %}
+
+    <br>
+
+    <a href="{{ url_for('notifications') }}" class="home-btn">
+        Back to Notifications
+    </a>
+
+</div>
 
 </body>
 
