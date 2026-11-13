@@ -365,8 +365,8 @@ def register():
 
         try:
             cursor.execute(
-                "SELECT id FROM users WHERE email = %s OR phone = %s LIMIT 1",
-                (email, phone)
+                "SELECT id FROM users WHERE email = %s LIMIT 1",
+                (email,)
             )
             existing_user = cursor.fetchone()
             if existing_user:
@@ -657,18 +657,7 @@ def lost_item():
                     (found_owner["user_id"],message,lost_item_id,found_item_id,final_score
                     )
                 )
-                notify_connection.commit()
-                print(f"Potential-match notification created for user {found_owner['user_id']}.")
-                notify_match_channels(
-                    found_owner.get("finder_phone"),
-                    found_owner.get("finder_email"),
-                    item_name,
-                    found_owner["item_name"],
-                    final_score,
-                    recipient_name=found_owner.get("finder_name"),
-                    other_person_name=found_owner.get("owner_name"),
-                    recipient_role="finder"
-                )
+                
             except Exception as e:
                 if notify_connection:
                     try:
@@ -721,9 +710,10 @@ def match_results():
                 (lost_item_id, session["user_id"])
             )
             lost_item = cursor.fetchone()
-            if lost_item:
-                lost_image = lost_item.get("image_path")
-                lost_item_name = lost_item.get("item_name") or lost_item_name
+            if not lost_item:
+                return "You are not authorized to view these potential matches.", 403
+            lost_image = lost_item.get("image_path")
+            lost_item_name = lost_item.get("item_name") or lost_item_name
         finally:
             cursor.close()
             connection.close()
@@ -1664,16 +1654,7 @@ def found_item():
                                 finder_data = finder_cursor.fetchone()
                                 finder_cursor.close()
                                 finder_connection.close()
-                                notify_match_channels(
-                                    lost_item_owner.get("phone"),
-                                    lost_item_owner.get("email"),
-                                    lost_item_data["item_name"],
-                                    item_name,
-                                    final_score,
-                                    recipient_name=lost_item_owner.get("name"),
-                                    other_person_name=(finder_data or {}).get("name"),
-                                    recipient_role="owner"
-                                )
+                                
                 except Exception as e:
                     print(
                         "Matching error:",

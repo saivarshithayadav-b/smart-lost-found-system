@@ -1,16 +1,26 @@
+
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from functools import lru_cache
 
 
-# Load pretrained SBERT model once
-model = SentenceTransformer("all-MiniLM-L6-v2")
+@lru_cache(maxsize=1)
+def load_sbert_model():
+    """Load SBERT only when text matching is requested."""
+    print("Loading SBERT model...")
+
+    model = SentenceTransformer(
+        "all-MiniLM-L6-v2",
+        device="cpu"
+    )
+
+    print("SBERT model loaded successfully.")
+
+    return model
 
 
 def normalize_text(value):
-    """
-    Convert text into a standard format.
-    """
-
+    """Convert text into a standard format."""
     if value is None:
         return ""
 
@@ -19,11 +29,8 @@ def normalize_text(value):
 
 def text_similarity(text1, text2):
     """
-    Calculate semantic similarity between two texts
-    using pretrained SBERT embeddings.
-
-    Returns:
-        value between 0.0 and 1.0
+    Calculate semantic similarity using pretrained SBERT.
+    Returns a value between 0.0 and 1.0.
     """
 
     text1 = normalize_text(text1)
@@ -32,21 +39,23 @@ def text_similarity(text1, text2):
     if not text1 or not text2:
         return 0.0
 
-    embedding1 = model.encode([text1])
-    embedding2 = model.encode([text2])
+    try:
+        model = load_sbert_model()
 
-    similarity = cosine_similarity(
-        embedding1,
-        embedding2
-    )[0][0]
+        embeddings = model.encode([text1, text2])
 
-    # Keep result within 0–1
-    similarity = max(
-        0.0,
-        min(1.0, similarity)
-    )
+        similarity = cosine_similarity(
+            [embeddings[0]],
+            [embeddings[1]]
+        )[0][0]
 
-    return round(
-        float(similarity),
-        4
-    )
+        similarity = max(
+            0.0,
+            min(1.0, float(similarity))
+        )
+
+        return round(similarity, 4)
+
+    except Exception as error:
+        print("SBERT ERROR: Text comparison failed:", error)
+        return 0.0

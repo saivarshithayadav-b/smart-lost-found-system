@@ -2,6 +2,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+.env_backup/
 .DS_Store
 uploads/*
 visual_genome/
