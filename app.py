@@ -732,6 +732,8 @@ def match_results():
         found_item_id = result.get("found_item_id")
         if not found_item_id:
             continue
+        if result.get("decision") != "Potential Match":
+            continue
 
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
@@ -742,8 +744,9 @@ def match_results():
                 FROM found_items f
                 JOIN users u ON u.id = f.user_id
                 WHERE f.id = %s
+                AND f.user_id != %s
                 """,
-                (found_item_id,)
+                (found_item_id, session["user_id"])
             )
             found_item = cursor.fetchone()
             if found_item:
@@ -1619,9 +1622,10 @@ def found_item():
                         radius_km=5
                     ) or []
                     for result in matching_results:
-                        if str(
-                            result.get("found_item_id")
-                        ) == str(found_item_id):
+                        if (
+                            str(result.get("found_item_id")) == str(found_item_id)
+                            and result.get("decision") == "Potential Match"
+                            ):
                             final_score = result.get(
                                 "final_score",
                                 0
