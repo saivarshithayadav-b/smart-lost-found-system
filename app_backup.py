@@ -22,7 +22,7 @@ from matching.database_matching import match_lost_item
 # FLASK APPLICATION
 app = Flask(__name__)
 load_dotenv()
-app.secret_key = "lost-found-secret-key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-only-change-this-secret")
 
 
 # IMAGE UPLOAD SETTINGS

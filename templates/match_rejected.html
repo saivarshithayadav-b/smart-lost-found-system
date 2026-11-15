@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Rejected</title>
+    <style>
+        body {
+            background-color: #fff1f1;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 150px;
+        }
+
+        .container {
+            background: white;
+            padding: 35px;
+            width: 350px;
+            margin: auto;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #dc3545;
+        }
+
+        p {
+            color: #555;
+        }
+
+        a {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>❌ Match Already Rejected</h2>
+        <p>This match has already been rejected.</p>
+        <a href="{{ url_for('home') }}">Return to Home</a>
+    </div>
+</body>
+</html>

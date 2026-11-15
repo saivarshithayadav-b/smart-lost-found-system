@@ -326,36 +326,30 @@
 
         <!-- MATCH INFORMATION -->
         <div class="match-box">
+    <h2>AI Match Result</h2>
 
-            <h2>AI Match Result</h2>
-
-            {% if match.final_score is defined and match.final_score is not none %}
-
-                <div class="score">
-                    {{ "%.2f"|format(match.final_score) }}
-                </div>
-
-            {% else %}
-
-                <div class="score">
-                    Potential Match
-                </div>
-
-            {% endif %}
-
-            <div class="status">
-                Potential Match
-            </div>
-
-            <p>
-                Please compare both items carefully before confirming
-                that the found item belongs to you.
-            </p>
-
+    {% if match.final_score is not none %}
+        <div class="score">
+            {{ "%.2f"|format(match.final_score|float) }}
         </div>
+    {% else %}
+        <div class="score">
+            Score unavailable
+        </div>
+    {% endif %}
+
+    <div class="status">
+        Potential Match
+    </div>
+
+    <p>
+        Please compare both items carefully before confirming
+        that the found item belongs to you.
+    </p>
+</div>
 
 
-        <!-- ACTIONS -->
+        
         <!-- ACTIONS -->
 <div class="actions">
 

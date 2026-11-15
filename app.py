@@ -884,8 +884,48 @@ def verify_match():
         match = cursor.fetchone()
 
         if match and match["verification_status"] == "rejected":
-            return "This match has already been rejected", 400
-
+            return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Match Rejected</title>
+                <style>
+                    body {
+                        background-color: #fff1f1;
+                        font-family: Arial;
+                        text-align: center;
+                        padding-top: 150px;
+                    }
+                    .box {
+                        background: white;
+                        padding: 30px;
+                        margin: auto;
+                        width: 350px;
+                        border-radius: 10px;
+                    }
+                    h2 {
+                        color: #dc3545;
+                    }
+                    a {
+                        display: inline-block;
+                        background: #dc3545;
+                        color: white;
+                        padding: 10px 20px;
+                        text-decoration: none;
+                        border-radius: 5px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="box">
+                    <h2>❌ Match Already Rejected</h2>
+                    <p>This match has already been rejected.</p>
+                    <a href="/">Return Home</a>
+                </div>
+            </body>
+            </html>
+            """, 400
+          
         already_confirmed = bool(
             match
             and match["verification_status"] == "confirmed"
